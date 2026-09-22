@@ -2,7 +2,7 @@
 
 An interactive book on distributed systems, LLM inference infrastructure, and platform engineering, written from first principles for senior backend engineers preparing for infrastructure roles at frontier AI labs.
 
-Every chapter builds on the ones before it. Most chapters end in a lab: a small simulator running in the page that lets you cause the failure the chapter describes, rather than read about it.
+Every chapter builds on the ones before it. Most chapters end in a lab: a small simulator running in the page that lets you cause the failure the chapter describes, rather than read about it!
 
 **Live site:** `https://<your-user>.github.io/<repo>/` (see [Deploying](#deploying))
 
