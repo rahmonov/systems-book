@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systems for Frontier Labs — an interactive book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#EEF1F5; --rail:#E3E8EF; --ink:#14213D; --ink-2:#3A4766; --ink-3:#6B7793;
+  --line:#CBD3DF; --paper:#FFFFFF; --accent:#1F4FD8; --accent-soft:#DCE4FA;
+  --ok:#2E7D4F; --warn:#C77700; --bad:#B3261E; --ok-soft:#DFF0E5; --warn-soft:#FCEBD2; --bad-soft:#F8DAD7;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.6;display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+a{color:var(--accent)}
+button,select,input{font-family:var(--sans)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* rail */
+nav.rail{background:var(--rail);border-right:1px solid var(--line);height:100vh;position:sticky;top:0;overflow-y:auto;font-family:var(--sans);font-size:14px;padding:22px 0 40px}
+.rail .brand{padding:0 20px 18px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.rail .brand h1{font-family:var(--serif);font-weight:600;font-size:20px;margin:0 0 4px;line-height:1.25}
+.rail .brand p{margin:0;color:var(--ink-3);font-size:13px}
+.rail .progress{margin:10px 0 0;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.rail .progress i{display:block;height:100%;background:var(--accent);width:0}
+.rail details{border-bottom:1px solid var(--line)}
+.rail summary{list-style:none;cursor:pointer;padding:10px 20px;font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center}
+.rail summary::-webkit-details-marker{display:none}
+.rail summary .count{color:var(--ink-3);font-weight:400;font-size:12px}
+.rail ol{list-style:none;margin:0;padding:0 0 8px}
+.rail li a{display:grid;grid-template-columns:34px 1fr;gap:6px;padding:6px 20px 6px 18px;color:var(--ink-2);text-decoration:none;line-height:1.35}
+.rail li a .n{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.rail li a:hover{background:rgba(255,255,255,.55)}
+.rail li a.active{background:var(--paper);color:var(--ink);border-left:3px solid var(--accent);padding-left:15px}
+.rail li a.done .n::after{content:" ✓";color:var(--ok)}
+.rail li a.stub{color:var(--ink-3)}
+
+/* main */
+main{padding:48px 56px 120px;max-width:1040px}
+.crumb{font-family:var(--sans);font-size:13px;color:var(--ink-3);margin-bottom:14px}
+h2.title{font-size:38px;line-height:1.15;font-weight:600;margin:0 0 14px;letter-spacing:-.01em}
+.meta{font-family:var(--sans);font-size:14px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:8px 18px;margin-bottom:34px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.meta .chips a{display:inline-block;background:var(--accent-soft);color:var(--accent);padding:2px 9px;border-radius:999px;text-decoration:none;margin:2px 4px 2px 0;font-size:13px}
+.prose{max-width:68ch}
+.prose h3{font-size:24px;margin:44px 0 12px;font-weight:600;line-height:1.25}
+.prose h4{font-family:var(--sans);font-size:15px;font-weight:600;margin:28px 0 8px;color:var(--ink-2)}
+.prose p{margin:0 0 18px}
+.prose ul,.prose ol{margin:0 0 18px;padding-left:24px}
+.prose li{margin-bottom:6px}
+.prose code{font-family:var(--mono);font-size:.84em;background:#E6EAF1;padding:1px 5px;border-radius:3px}
+.prose pre{font-family:var(--mono);font-size:14px;line-height:1.5;background:var(--ink);color:#E9EEF8;padding:16px 18px;border-radius:6px;overflow:auto;margin:0 0 22px}
+.prose pre code{background:none;padding:0;color:inherit;font-size:inherit}
+.prose .callout{border-left:4px solid var(--ink-3);padding:10px 18px;background:#F6F8FB;margin:0 0 22px;font-size:17px}
+.prose .callout.key{border-color:var(--accent)}
+.prose figure{margin:0 0 26px}
+.prose figure svg{max-width:100%;height:auto;display:block;background:var(--paper);border:1px solid var(--line);border-radius:6px}
+.prose figcaption{font-family:var(--sans);font-size:13px;color:var(--ink-3);margin-top:8px}
+.objectives{font-family:var(--sans);font-size:15px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px 20px 8px;margin:0 0 30px;max-width:68ch}
+.objectives h4{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--ink-2)}
+.objectives ul{margin:0;padding-left:20px}
+
+/* lab bench */
+.lab{border-top:5px solid var(--accent);background:var(--paper);border-radius:0 0 8px 8px;box-shadow:0 1px 0 var(--line);margin:34px 0 40px;font-family:var(--sans);font-size:14px}
+.lab header{padding:14px 20px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lab header h4{margin:0;font-size:16px;font-weight:600;font-family:var(--sans)}
+.lab header .hint{color:var(--ink-3);font-size:13px}
+.lab .body{padding:6px 20px 18px;display:grid;grid-template-columns:1fr 300px;gap:18px}
+.lab .body.single{grid-template-columns:1fr}
+.lab .stage{min-height:200px}
+.lab .controls{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:0 20px 12px}
+.lab .controls label{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.lab .controls input[type=range]{width:130px}
+.lab button{background:var(--ink);color:#fff;border:0;border-radius:4px;padding:7px 12px;font-size:13px;font-weight:500;cursor:pointer}
+.lab button.secondary{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.lab button.warn{background:var(--warn)}
+.lab button.bad{background:var(--bad)}
+.lab button:disabled{opacity:.45;cursor:default}
+.lab select{padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--paper)}
+.lab .log{background:#0F1A33;color:#DCE4F6;font-family:var(--mono);font-size:12.5px;line-height:1.55;border-radius:6px;padding:10px 12px;height:260px;overflow-y:auto}
+.lab .log .t{color:#7F8FB3}
+.lab .log .ok{color:#8FDCA8}.lab .log .warn{color:#F5C56B}.lab .log .bad{color:#F49A92}.lab .log .info{color:#9FBAFF}
+.lab .stats{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0}
+.lab .stat{background:#F3F5F9;border-radius:6px;padding:8px 12px;min-width:110px}
+.lab .stat b{display:block;font-size:20px;font-weight:600;line-height:1.1}
+.lab .stat span{color:var(--ink-3);font-size:12px}
+.lab svg{width:100%;height:auto;display:block}
+.node{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+.node.dead{fill:#F1F1F1;stroke:#999;stroke-dasharray:4 3}
+.node.leader{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
+.node.candidate{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2}
+.node.partitioned{stroke:var(--bad);stroke-dasharray:5 3}
+.lbl{font-family:var(--sans);font-size:12px;fill:var(--ink-2)}
+.val{font-family:var(--mono);font-size:13px;fill:var(--ink);font-weight:500}
+.msg{fill:var(--accent)}
+.msg.stale{fill:var(--warn)}
+.stub-note{font-family:var(--sans);font-size:15px;background:var(--warn-soft);border-left:4px solid var(--warn);padding:12px 18px;margin:0 0 26px;max-width:68ch}
+.pager{display:flex;justify-content:space-between;gap:16px;margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--sans);font-size:14px}
+.pager a{text-decoration:none;color:var(--ink);max-width:45%}
+.pager a small{display:block;color:var(--ink-3);font-size:12px}
+.pager a:hover{color:var(--accent)}
+.homework{font-family:var(--sans);font-size:15px;border:1px dashed var(--ink-3);border-radius:6px;padding:14px 20px;max-width:68ch;margin-top:30px}
+.homework h4{margin:0 0 8px;font-size:14px}
+.menu-btn{display:none}
+@media (max-width:900px){
+  body{grid-template-columns:1fr}
+  nav.rail{position:fixed;left:0;top:0;width:300px;transform:translateX(-100%);transition:transform .2s;z-index:10}
+  nav.rail.open{transform:none}
+  main{padding:70px 20px 80px}
+  .menu-btn{display:block;position:fixed;top:12px;left:12px;z-index:11;background:var(--ink);color:#fff;border:0;border-radius:4px;padding:8px 12px}
+  .lab .body{grid-template-columns:1fr}
+  h2.title{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<button class="menu-btn" id="menuBtn" aria-label="Open contents">Contents</button>
+<nav class="rail" id="rail" aria-label="Book contents">
+  <div class="brand">
+    <h1>Systems for Frontier Labs</h1>
+    <p>Distributed systems, inference, and platform engineering — from first principles.</p>
+    <div class="progress"><i id="progressBar"></i></div>
+  </div>
+  <div id="toc"></div>
+</nav>
+<main id="main"></main>
+<script>
+// ---------- Content ----------
+const CH = {}; // id -> chapter
+
+
+CH.s0 = {
+n:0, part:3, title:"Why distributed systems are hard", widget:"network", on:[],
+obj:["Name the three reasons to run software on more than one machine and see that all three force the same problem","Describe partial failure and why a slow node is indistinguishable from a dead one","Explain the 'did it happen?' problem and why exactly-once delivery is impossible","Hold a mental model of the system as nodes plus messages that can be lost, delayed, duplicated and reordered","Navigate the map of Part 1"],
+html:`
+<h3>Start with one box</h3>
+<p>Imagine the simplest possible service: a single program on a single machine. A request arrives, the program updates some state, a response goes back. If the machine is up, everything works. If it is down, nothing works. Function calls return or throw; the clock is one clock; "before" and "after" mean what they say. Almost nothing in this book is hard on one machine.</p>
+<p>We leave the one box for three reasons, and only three:</p>
+<ul>
+<li><b>Scale.</b> The load, or the data, no longer fits on one machine.</li>
+<li><b>Fault tolerance.</b> The machine will fail, and we want the service to survive it.</li>
+<li><b>Latency.</b> Users are far away, and the speed of light is finite. A round trip from Frankfurt to Oregon is about 140 ms before you have done any work.</li>
+</ul>
+<p>Each reason forces the same consequence: state lives on more than one machine, and those machines must communicate over a network to agree on it. Every chapter that follows is about the trouble that causes.</p>
+
+<h3>Two things break at once</h3>
+<p>Moving from one box to many breaks two assumptions you never noticed you were making.</p>
+<h4>Partial failure</h4>
+<p>On one machine, failure is total: the process is running or it is not. In a system of many machines, some are working, some are dead, and — this is the part that hurts — some are alive but slow, overloaded, or paused, in a way that from the outside is <em>indistinguishable</em> from dead. A node that has not responded for two seconds might have crashed, or might be in a garbage-collection pause and about to wake up and continue as if nothing happened. You cannot tell. Any decision you make about it ("it's dead, promote a replacement") can be wrong, and the node may later act on the belief that it is still in charge. Chapters 6, 8 and 13 exist because of this paragraph.</p>
+<h4>The unreliable network</h4>
+<p>Between machines, messages can be <b>lost</b> (a switch drops the packet, a queue overflows), <b>delayed</b> arbitrarily (congestion, retransmission, a slow receiver), <b>duplicated</b> (a retry at any layer), and <b>reordered</b> (two paths, two latencies). TCP hides some of this inside one connection, but not across connections, not across a failover, and not when the connection itself dies. At the level of "my request to your service," all four happen.</p>
+
+<h3>The question you cannot answer</h3>
+<p>Put those two together and you get the central puzzle. A client sends a request — say, "charge this card 30 euros" — and receives no response within its timeout. Exactly one of the following is true, and the client cannot tell which:</p>
+<ol>
+<li>The request was lost on the way. Nothing happened.</li>
+<li>The request arrived and was processed, but the response was lost. The charge happened.</li>
+<li>The server crashed after processing but before replying. The charge happened.</li>
+<li>The server crashed before processing. Nothing happened.</li>
+<li>The server is slow and will respond eventually. The charge may or may not have happened yet.</li>
+</ol>
+<p>If the client retries, it risks charging twice (cases 2, 3, 5). If it does not, it risks not charging at all (cases 1, 4). No amount of cleverness on the client side resolves this, because the information needed is on the other side of the broken link.</p>
+<div class="callout key">This is why <b>exactly-once delivery</b> is impossible: the sender can never know whether a message was delivered. What is possible is exactly-once <em>effect</em> — deliver at least once, and make the receiver ignore repeats. That single idea, made rigorous, is Chapter 9. You will see a preview of it in this chapter's lab.</div>
+
+<h3>No global clock</h3>
+<p>One more casualty of leaving the box. Each machine has its own clock, and they disagree — by milliseconds after careful synchronisation, by seconds or more when something goes wrong. So "event A happened before event B" is not well-defined across machines unless a message from A's machine reached B's machine in between. Ordering has to be built out of messages, not read off clocks. Chapter 11 does this properly; until then, be suspicious every time a design says "take the latest by timestamp."</p>
+
+<h3>The mental model for the rest of the book</h3>
+<p>Every system from here on is the same picture: a set of <b>nodes</b>, each with local state and a local clock, exchanging <b>messages</b> over links that may lose, delay, duplicate or reorder them, where any node may crash at any time and may or may not come back. When a design is confusing, redraw it in this form. The fancy words (linearizable, quorum, lease, idempotent) are all just constraints on what nodes may do given what messages they have seen.</p>
+
+<h3>A map of Part 1</h3>
+<ul>
+<li><b>Chapters 1–2</b> — what "agreeing on state" can even mean when copies lag (consistency models), and what a node should do when it cannot reach the others (CAP).</li>
+<li><b>Chapters 3–5</b> — the two families of replication: one leader decides the order (3), or no leader and overlapping quorums instead (4), which forces you to merge conflicts (5).</li>
+<li><b>Chapters 6–8</b> — the coordination primitives that make a leader safe: consensus (6, 7) and the leases and fencing you build on it (8).</li>
+<li><b>Chapters 9–11</b> — correctness tools: idempotency for the "did it happen?" problem (9), partitioning for scale (10), logical time for ordering (11).</li>
+<li><b>Chapters 12–13</b> — the operational layer: retries and backpressure that do not make outages worse (12), and detecting failure and containing it (13).</li>
+</ul>
+
+<h3>Lab: send a request into the fog</h3>
+<p>One client, one server, one network you control. The server applies "charges." Set loss, delay and duplication, then <b>send a request</b>. When the client times out, it tells you — and it cannot tell you which of the five cases occurred. <b>Retry</b> and watch the server's applied-charge count drift away from what the client intended. The <b>crash after processing</b> button arms case 3 for the next request. Then switch the server to <b>idempotent</b> mode: it remembers request IDs and ignores repeats. Retries become safe, and intended and applied converge again. That switch is the whole of Chapter 9, in miniature.</p>
+`,
+hw:["With loss at 30% and duplication at 20%, non-idempotent server, send ten requests and retry every timeout. Record intended vs applied. Explain each excess charge by one of the five cases.","Arm 'crash after processing', send, wait for the timeout. Argue whether the client should retry. Then explain what information would let it decide.","Write down every network call your current system makes where a timeout is followed by an automatic retry, and classify each as safe or unsafe under the five cases."]
+};
+
+CH.s1 = {
+n:1, part:3, title:"Consistency models, made concrete", widget:"consistency", on:["s0"],
+obj:["Explain why a replicated value can be read differently by different clients","Define linearizability, sequential, causal and eventual consistency operationally, by the anomalies each one forbids","Recognise stale reads and non-monotonic reads in a history","Predict which guarantee a design gives from its replication rule"],
+html:`
+<h3>Add a second copy</h3>
+<p>Chapter 0 left us with a single box and three reasons to leave it. Take the smallest possible step: a single variable <code>x</code>, now stored on more than one machine. The moment there are two copies, there is a window of time in which they disagree, because information travels at finite speed over the unreliable network from Chapter 0. Every consistency model is a statement about what a client is allowed to observe during that window. Every strange word in this chapter — linearizable, causal, eventual — is a name for one such statement.</p>
+
+<h3>The register, with a delay</h3>
+<p>Model the system as N replicas of a register. A client sends a write to one replica; that replica applies it and forwards it to the others, which takes some time. Clients may read from any replica. That is the whole model, and it is enough to produce every anomaly in this chapter.</p>
+<figure>
+<svg viewBox="0 0 640 210" role="img" aria-label="Timeline showing a write reaching replica A immediately and replica B later, with a stale read in between">
+<line x1="60" y1="60" x2="600" y2="60" stroke="#CBD3DF"/><text x="20" y="64" class="lbl">A</text>
+<line x1="60" y1="130" x2="600" y2="130" stroke="#CBD3DF"/><text x="20" y="134" class="lbl">B</text>
+<rect x="120" y="48" width="14" height="24" fill="#1F4FD8"/><text x="120" y="40" class="lbl">write x=2 at A</text>
+<line x1="134" y1="60" x2="330" y2="130" stroke="#1F4FD8" stroke-dasharray="4 3"/><text x="215" y="90" class="lbl" fill="#1F4FD8">propagation</text>
+<rect x="330" y="118" width="14" height="24" fill="#1F4FD8"/><text x="320" y="165" class="lbl">B applies x=2</text>
+<rect x="230" y="118" width="14" height="24" fill="#C77700"/><text x="180" y="165" class="lbl" fill="#C77700">read at B → 1 (stale)</text>
+<rect x="420" y="48" width="14" height="24" fill="#2E7D4F"/><text x="400" y="40" class="lbl" fill="#2E7D4F">read at A → 2</text>
+<text x="60" y="200" class="lbl">time →</text>
+</svg>
+<figcaption>The write is acknowledged at A. Until it reaches B, a reader at B sees the old value. Whether that is "wrong" depends entirely on which model you promised.</figcaption>
+</figure>
+
+<h3>Define models by what they forbid</h3>
+<p>Textbook definitions of consistency models are phrased in terms of orderings. It is easier to define them by the anomaly each one rules out, because that is how you will meet them in production: as a bug report.</p>
+<h4>Eventual consistency</h4>
+<p>If writes stop, all replicas converge to the same value. That is the entire promise. It forbids nothing during the window. Stale reads are allowed; a client may see <code>x=2</code> and then, a moment later from another replica, <code>x=1</code>. Eventual consistency is a liveness property (something good eventually happens), not a safety property (nothing bad ever happens). It is what you get for free by forwarding writes and never coordinating.</p>
+<h4>Causal consistency</h4>
+<p>If a write could have been caused by an earlier one — the writer had read it first — then every replica applies them in that order. Causal consistency forbids the anomaly where you see a reply before the message it replies to. It says nothing about writes that are concurrent (neither could have seen the other); replicas may apply those in either order, which is why causally consistent systems still need conflict handling (Chapter 5).</p>
+<h4>Sequential consistency</h4>
+<p>There exists a single global order of all operations that every client agrees with, and each client's own operations appear in that order in the sequence it issued them. What sequential consistency does <em>not</em> promise is that this order respects real time. Your write can be acknowledged and still appear "after" a read that started later in wall-clock terms, provided everyone agrees on the same story.</p>
+<h4>Linearizability</h4>
+<p>Sequential consistency plus real time. Every operation appears to take effect instantaneously at some point between its invocation and its response. Once any client has observed a value, no client may later observe an older one. This is the model that behaves like the single box we started with. It is also the most expensive, because "instantaneously, everywhere" means somebody has to coordinate before answering.</p>
+
+<div class="callout key"><b>The test you will actually apply:</b> take a history of operations with start and end times. If you can place a single point inside each operation's interval such that reading those points in time order gives a legal single-copy execution, the history is linearizable. If you can find <em>some</em> total order that is legal but violates real time, it is sequentially consistent. If you can only find a legal order per causal chain, it is causal. If even that fails but replicas eventually agree, it is eventual.</div>
+
+<h3>Session guarantees: the practical middle</h3>
+<p>Most application bugs are not violations of linearizability across clients; they are a single client contradicting itself. Four guarantees, collectively called session guarantees, name the cases:</p>
+<ul>
+<li><b>Read-your-writes.</b> After I write <code>x=2</code>, my own reads return 2 or later. Violated when you post a comment, refresh, and it is gone.</li>
+<li><b>Monotonic reads.</b> Once I have seen <code>x=2</code>, I never see an older value. Violated when a refresh makes new data disappear.</li>
+<li><b>Monotonic writes.</b> My writes are applied in the order I issued them, everywhere.</li>
+<li><b>Writes-follow-reads.</b> If I read a value and then write, my write is ordered after what I read.</li>
+</ul>
+<p>These are cheap to provide (route a session to one replica, or carry a version token) and fix most user-visible weirdness without paying for linearizability. Chapter 3 shows the implementation.</p>
+
+<h3>Why this matters for the systems you will build</h3>
+<p>An inference platform stores API keys, rate-limit counters, model routing tables, conversation state, and billing ledgers. Each wants a different point on this spectrum: a routing table can be eventual; a rate-limit counter can tolerate a little staleness in exchange for speed; a billing ledger cannot. Design reviews at this level almost always contain the question "what happens if this read is stale?" — and the right answer is usually "here is the model I chose and here is why the anomaly is acceptable," not "it won't be stale."</p>
+
+<h3>Lab: catch the anomalies</h3>
+<p>Below is the model from the diagram, running. Three replicas hold a register. Writes go to the replica you pick and propagate with the delay set on the slider. Reads return whatever the chosen replica has right now. The checker knows the true history and flags two things: a <b>stale read</b> (the value returned is older than a write that has already been acknowledged) and a <b>non-monotonic read</b> (this client previously saw a newer value). Set the delay to zero and you have linearizability. Raise it and watch the guarantees fall away, in order.</p>
+`,
+hw:["Set delay to ~2s, write twice to A quickly, then read from C three times. Write down the history and classify it using the test in the callout.","Find a sequence of operations that is sequentially consistent but not linearizable. (Hint: two clients, one replica each, no anomaly flagged for either client alone.)","For each store in an inference platform (API keys, rate counters, routing table, chat history, billing) pick the weakest model you would accept and justify it in one sentence."]
+};
+
+CH.s2 = {
+n:2, part:3, title:"CAP, PACELC, and what “AP” costs", widget:"cap", on:["s1"],
+obj:["State CAP precisely and explain why it is a statement about partitions only","Use PACELC to describe the latency/consistency choice in the normal case","Show what an AP system returns during a partition and what a CP system refuses","Reason about split-brain and why 'available' is not the same as 'correct'"],
+html:`
+<h3>What a partition is</h3>
+<p>Two replicas are partitioned when messages between them are lost or delayed long enough that, for practical purposes, each must act without hearing from the other. Partitions are not exotic. A switch reboots, a cloud availability zone loses its cross-zone link, a garbage-collection pause makes one node silent for thirty seconds. From the outside, a slow node and a dead node look identical until the slow one wakes up.</p>
+<p>Chapter 1's register had a propagation delay. A partition is that delay becoming unbounded for a while. Every question in this chapter is: while the delay is unbounded, what should a replica that receives a request do?</p>
+
+<h3>CAP, stated carefully</h3>
+<p>CAP says a distributed store cannot simultaneously provide all three of:</p>
+<ul>
+<li><b>Consistency</b> — here meaning linearizability, the single-box illusion from Chapter 1;</li>
+<li><b>Availability</b> — every request to a non-failed node receives a non-error response;</li>
+<li><b>Partition tolerance</b> — the system keeps operating when messages are lost.</li>
+</ul>
+<p>Since partitions happen whether you like it or not, partition tolerance is not optional. The real choice is what a replica does <em>during</em> a partition:</p>
+<ul>
+<li>A <b>CP</b> replica that cannot confirm it holds the latest value refuses to answer (returns an error or waits). It stays correct at the cost of being unavailable on the minority side.</li>
+<li>An <b>AP</b> replica answers with what it has. It stays available at the cost of returning stale values and accepting writes that will conflict later.</li>
+</ul>
+<p>Two common misreadings. First, CAP does not say you pick two of three at design time for all time; it says you pick C or A <em>for the duration of a partition</em>. Second, "consistency" in CAP is the strong linearizable kind, not the ACID kind from databases.</p>
+
+<h3>PACELC: the part CAP leaves out</h3>
+<p>Most of the time there is no partition. CAP says nothing about that case, but there is still a tradeoff: to be linearizable, a replica must coordinate with others before responding, and coordination costs a round trip. PACELC (Abadi, 2012) extends the acronym: <em>if Partition, choose A or C; Else, choose Latency or Consistency</em>. A PA/EL system (Dynamo, Cassandra by default) answers fast from local state always. A PC/EC system (etcd, Spanner, ZooKeeper) coordinates always. There are mixed designs — PA/EC would be a system that is normally strongly consistent but degrades to serving stale data under partition.</p>
+
+<h3>Split-brain: the failure mode of AP</h3>
+<p>Suppose replicas A and B are partitioned and both accept writes. A client writes <code>balance = 100 − 30</code> at A; another writes <code>balance = 100 − 80</code> at B. Both succeed. When the partition heals, there are two histories that cannot both be true. An AP system must have a rule for this moment — last-writer-wins, application-level merge, or CRDTs (Chapter 5) — and the rule will lose information for some workloads. For a shopping cart, merging is fine. For a bank balance, one of those withdrawals should not have been allowed, and no merge rule can undo the fact that it was.</p>
+<div class="callout key">Availability is a property of the response, not of its correctness. An AP system is "available" in the CAP sense even while it is telling two clients contradictory things.</div>
+
+<h3>Where each choice belongs</h3>
+<p>In an inference platform: the fleet membership and leader locks (Chapter 8) must be CP — two nodes both believing they are the scheduler is a disaster. The per-region cache of the model routing table can be AP — a slightly stale route sends a request to a replica that still works. Billing counters that gate access can be AP with reconciliation: over-serve briefly rather than reject paying customers during a partition, then settle. Design reviews go badly when someone picks a CP store for something that needs to survive a region outage, or an AP store for something that must not fork.</p>
+
+<h3>Lab: cause a partition</h3>
+<p>The register from Chapter 1 now has a partition switch and a mode selector. In <b>CP</b> mode, a replica only answers if it can reach a majority; on the minority side it returns errors. In <b>AP</b> mode every replica always answers from local state. Turn on automatic traffic, flip the partition, and compare the counters: CP racks up refused requests and zero stale reads; AP racks up stale reads and, if you write on both sides, a conflict when the partition heals.</p>
+`,
+hw:["Run 60 seconds of traffic in each mode with a partition halfway through. Record refused, stale, and conflicting operations. Which would you rather explain to a customer, for which kind of data?","Classify five systems you have operated as PA/EL, PC/EC, or something else, and check your answer against their documentation.","Describe a PA/EC system in one paragraph and name a workload where it is the right choice."]
+};
+
+CH.s3 = {
+n:3, part:3, title:"Replication architectures", widget:"replication", on:["s1","s2"],
+obj:["Distinguish synchronous, semi-synchronous and asynchronous leader-based replication by what is durable at acknowledgement time","Explain why asynchronous failover loses acknowledged writes and quantify it","Implement read-your-writes on top of lagging followers","Know when multi-leader or leaderless replication is worth its conflicts"],
+html:`
+<h3>Someone has to decide the order</h3>
+<p>In Chapter 1 writes went to any replica. That was convenient for the model and terrible for correctness: two replicas could apply the same pair of writes in opposite orders and never agree. The simplest fix is to elect one replica as the <b>leader</b>: all writes go to it, it assigns them an order, and the other replicas — <b>followers</b> — apply the leader's log in that order. Now every replica converges to the same sequence, and the only remaining question is how long a follower may lag.</p>
+
+<h3>Three ways to acknowledge a write</h3>
+<p>When the leader receives a write, it appends to its local log. When does it tell the client "done"?</p>
+<ul>
+<li><b>Asynchronous:</b> immediately, before any follower has the write. Fastest. If the leader dies in the next few milliseconds the write is gone even though the client was told it succeeded.</li>
+<li><b>Synchronous:</b> after every follower confirms. Slowest, and a single slow follower stalls all writes. Rarely used in full form.</li>
+<li><b>Semi-synchronous:</b> after at least one (or a configured number of) followers confirm. This is what "synchronous replication" means in Postgres and MySQL in practice: durability on two machines, without waiting for the slowest.</li>
+</ul>
+<p>The difference is not performance tuning; it is a statement about what "acknowledged" means. A system that acknowledges asynchronously is making a promise it can break.</p>
+
+<h3>Replication lag and where it bites</h3>
+<p>Followers apply the log some time after the leader. That time is <b>replication lag</b>, and it is what turns the abstract "propagation delay" of Chapter 1 into a number on a dashboard. Reads served from followers — the usual reason to have followers at all — see the world as it was one lag ago. Three session anomalies appear immediately:</p>
+<ul>
+<li>You write to the leader, then read from a follower: your write is not there. Fix: route a client's reads to the leader for a short window after it writes, or have the leader return a log position and have followers refuse to serve a read until they have applied that position.</li>
+<li>You read from follower A (fresh), then follower B (stale): time goes backwards. Fix: pin a session to one follower, or carry the log position forward.</li>
+<li>Two causally related writes arrive at a follower out of order across partitions. Fix: ensure causally related writes live in the same partition, or use causal timestamps.</li>
+</ul>
+
+<h3>Failover, and the writes it loses</h3>
+<p>When the leader dies, a follower must take over. Whoever picks the new leader (a coordinator like ZooKeeper, or the replicas themselves — Chapter 6) should pick the follower with the most complete log. Even so, with asynchronous replication the new leader may be missing writes that the old leader acknowledged. Those writes are simply lost. If the old leader comes back, its extra entries conflict with what the new leader has done since, and the standard resolution is to discard them.</p>
+<p>The quantity you care about is: <em>acknowledged writes not present on the most up-to-date follower at the moment of failure</em>. That number is zero under semi-synchronous replication and equals roughly (write rate × lag) under asynchronous replication. GitHub's 2018 incident, in which a replica was promoted while the old primary still had unreplicated writes, is the canonical case study.</p>
+<div class="callout">Also beware the false failover: the old leader is not dead, just slow (a GC pause, a saturated NIC). Now two nodes accept writes. Preventing this requires fencing — a way to make the old leader unable to act even if it believes it is still in charge. Chapter 8.</div>
+
+<h3>Multi-leader and leaderless</h3>
+<p>If clients in two regions both need fast writes, one leader is too far from one of them. <b>Multi-leader</b> replication gives each region its own leader and replicates between leaders asynchronously. You have just re-introduced the concurrent-write problem from Chapter 1 between leaders, and must handle conflicts (Chapter 5). <b>Leaderless</b> replication (Chapter 4) removes the leader entirely and uses quorums to keep replicas from drifting too far. Both are appropriate when the workload tolerates conflicts — or when availability across regions matters more than a single order.</p>
+
+<h3>Lab: lose some writes</h3>
+<p>A leader and two followers. Followers apply the leader's log after a lag you control. Send writes with the button (or hold it), then <b>crash the leader</b>. The simulator promotes the most up-to-date follower and reports how many acknowledged writes it never received. Switch to semi-synchronous mode and repeat: acknowledgements now wait for one follower, throughput drops, and the lost-write count goes to zero.</p>
+`,
+hw:["Under asynchronous mode with 1.5s lag, hold the write button for ten seconds then crash the leader. Compare the lost-write count to (write rate × lag).","Implement read-your-writes in the simulator's terms: describe the token the leader would return and the check a follower would perform.","Read the GitHub October 2018 postmortem and identify which of this chapter's concepts each paragraph corresponds to."]
+};
+CH.s4 = {
+n:4, part:3, title:"Leaderless systems: the Dynamo toolkit", widget:"quorum", on:["s1","s2","s3"],
+obj:["Derive the quorum overlap condition R + W > N and explain what it does and does not guarantee","Explain sloppy quorums, hinted handoff, read repair and anti-entropy as the four mechanisms that keep leaderless replicas converging","Tune N, R and W for a given latency and durability target","Identify the cases where a quorum read still returns stale data"],
+html:`
+<h3>No leader, so overlap instead</h3>
+<p>Leader-based replication (Chapter 3) got its ordering from one node. Leaderless systems — Amazon's Dynamo paper (2007), Cassandra, Riak, Scylla — refuse to have a single node whose death or slowness stalls everything. Any replica can accept a write or serve a read. The question becomes: without a leader, how does a reader know it has the newest value?</p>
+<p>The answer is arithmetic. Store every value on <b>N</b> replicas. Require a write to be confirmed by <b>W</b> of them before acknowledging. Require a read to consult <b>R</b> of them and take the newest version. If <code>R + W &gt; N</code>, the set of replicas that saw the write and the set the reader consulted must overlap in at least one node, so the reader is guaranteed to encounter the latest write.</p>
+<figure>
+<svg viewBox="0 0 640 170" role="img" aria-label="Five replicas; a write reaches three, a read consults three; they share at least one">
+<g class="lbl"><text x="20" y="30">N = 5 replicas</text></g>
+<g>
+<circle cx="110" cy="90" r="22" class="node"/><circle cx="200" cy="90" r="22" class="node"/><circle cx="290" cy="90" r="22" class="node"/><circle cx="380" cy="90" r="22" class="node"/><circle cx="470" cy="90" r="22" class="node"/>
+<text x="104" y="95" class="val">1</text><text x="194" y="95" class="val">2</text><text x="284" y="95" class="val">3</text><text x="374" y="95" class="val">4</text><text x="464" y="95" class="val">5</text>
+</g>
+<path d="M85 50 H315 a10 10 0 0 1 10 10 V60" fill="none" stroke="#1F4FD8" stroke-width="2"/><text x="90" y="42" class="lbl" fill="#1F4FD8">W = 3 confirmed the write</text>
+<path d="M265 140 H495 a10 10 0 0 0 10 -10 V130" fill="none" stroke="#C77700" stroke-width="2"/><text x="280" y="160" class="lbl" fill="#C77700">R = 3 consulted on read</text>
+<circle cx="290" cy="90" r="30" fill="none" stroke="#2E7D4F" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="520" y="95" class="lbl" fill="#2E7D4F">overlap ≥ 1</text>
+</svg>
+<figcaption>With N=5, W=3, R=3, any write set and any read set share at least one replica. Tune W down for faster writes and R must go up to compensate.</figcaption>
+</figure>
+
+<h3>Choosing the numbers</h3>
+<ul>
+<li><b>W = N, R = 1:</b> reads are fast and hit one node; writes wait for everyone and fail if any replica is down.</li>
+<li><b>W = 1, R = N:</b> writes are fast and survive anything; reads are slow and fail if any replica is down.</li>
+<li><b>W = R = ⌈(N+1)/2⌉:</b> majority both ways, tolerates ⌊(N−1)/2⌋ failures for both reads and writes. N=3, W=R=2 is the common default.</li>
+<li><b>R + W ≤ N:</b> no overlap guarantee. You are accepting stale reads for speed. This is a legitimate setting for caches and metrics.</li>
+</ul>
+
+<h3>Why a quorum read is still not linearizable</h3>
+<p>Overlap guarantees the reader <em>encounters</em> the newest write among the replicas it asks. It does not make the system behave like a single box, for several reasons you should be able to recite:</p>
+<ul>
+<li>A write that reached only W−1 replicas before failing is neither committed nor rolled back. Later readers may or may not see it depending on which replicas they hit.</li>
+<li>Two writes with concurrent timestamps and no leader have no natural order. "Newest" depends on clocks (Chapter 11) or version vectors (Chapter 5).</li>
+<li>A read may overlap with an in-flight write: one reader's R set already contains it, another's does not yet. Two clients can disagree about the present.</li>
+</ul>
+<p>Leaderless systems therefore live in the eventual-to-causal band of Chapter 1. Overlap narrows the staleness window; it does not close it.</p>
+
+<h3>The four convergence mechanisms</h3>
+<h4>Sloppy quorums and hinted handoff</h4>
+<p>If some of the N "home" replicas for a key are unreachable, a strict quorum fails the write. A <b>sloppy quorum</b> accepts the write on W <em>reachable</em> nodes, even if they are not the designated homes, and each stand-in stores a <b>hint</b>: "this belongs to node 4; deliver it when node 4 returns." This trades a little consistency (a reader hitting the real homes may miss the write) for availability during failures. Dynamo chose it; many later systems make it optional.</p>
+<h4>Read repair</h4>
+<p>When a read consults R replicas and finds that some hold older versions, the coordinator writes the newest version back to the stale ones. Frequently read keys heal themselves. Rarely read keys do not.</p>
+<h4>Anti-entropy</h4>
+<p>A background process compares replicas and fixes differences. Comparing every key would be too expensive, so replicas build a <b>Merkle tree</b>: a hash tree over key ranges, where each parent hashes its children. Two replicas exchange root hashes; if equal, the ranges match; if not, they descend only into the differing subtrees. Divergence in a few keys costs O(log n) hash comparisons rather than O(n).</p>
+
+<h3>Where this sits in your stack</h3>
+<p>The Dynamo toolkit is what you want for: session stores, feature flags, per-region caches, metrics, and anything where every region must keep writing through a partition. It is what you do not want for: fleet leadership, billing, or any invariant that must hold globally. Chapter 6 gives you the tool for those.</p>
+
+<h3>Lab: tune the quorum</h3>
+<p>Five replicas. Slide N, W and R. The panel tells you whether overlap holds. Each round the simulator writes a new version to W random live replicas, kills nodes at the rate you choose, then reads from R random live replicas and reports whether the newest version was found. With hinted handoff on, writes that miss a dead home replica are parked and delivered when it recovers; with read repair on, stale replicas discovered during a read are fixed. Watch the stale-read rate respond to each knob.</p>
+`,
+hw:["Find a setting with R + W > N where the simulator still reports stale reads, and explain why using the list in 'Why a quorum read is still not linearizable'.","With N=5, choose W and R for (a) a write-heavy metrics store and (b) a read-heavy configuration store. Justify the latency and failure tolerance of each.","Sketch a Merkle tree over 16 keys and count the hash comparisons needed to find one differing key."]
+};
+
+CH.s5 = {
+n:5, part:3, title:"Conflict resolution and CRDTs", widget:"crdt", on:["s2","s4"],
+obj:["Explain why last-writer-wins silently discards data and when that is acceptable","Use version vectors to detect concurrent writes rather than order them","Define a CRDT by its merge function's properties and build a counter and a set","Decide when a CRDT is worth its metadata cost versus a single leader"],
+html:`
+<h3>Concurrent writes are a fact, not a bug</h3>
+<p>Chapters 2 and 4 both ended in the same place: two replicas accepted writes to the same key without hearing from each other, and now must agree on a value. Multi-leader replication produces this across regions; leaderless replication produces it whenever W &lt; N. You cannot prevent it without a leader, so you need a rule for resolving it — and every rule is a choice about which information to keep.</p>
+
+<h3>Last-writer-wins</h3>
+<p>Attach a timestamp to each write; on conflict, keep the one with the higher timestamp. Simple, and used by Cassandra by default. Three problems:</p>
+<ul>
+<li>Clocks on different machines disagree (Chapter 11). "Last" may not be last.</li>
+<li>The losing write is discarded entirely, even if the client was told it succeeded. LWW is durable-until-a-conflict.</li>
+<li>Two writes with identical timestamps need a tie-break, usually node ID, which is arbitrary.</li>
+</ul>
+<p>LWW is fine when the value is a whole that should be replaced (a user's display name, a cached blob) and unacceptable when the value is an aggregate that should be combined (a counter, a set, a cart).</p>
+
+<h3>Detecting concurrency: version vectors</h3>
+<p>Before deciding how to merge, you need to know whether two versions are actually concurrent or whether one simply came later. A <b>version vector</b> is a map from replica ID to a counter. Each replica increments its own entry when it writes. Version <em>a</em> dominates <em>b</em> if every entry of <em>a</em> is ≥ the corresponding entry of <em>b</em>; then <em>a</em> is simply newer and <em>b</em> can be dropped. If neither dominates, the writes were concurrent and the system must keep both (as <b>siblings</b>, in Riak's terms) or merge them. Version vectors turn "which is newer" from a clock question into a causality question.</p>
+
+<h3>CRDTs: make merge a mathematical operation</h3>
+<p>A Conflict-free Replicated Data Type is a data structure with a <code>merge(a, b)</code> function that is:</p>
+<ul>
+<li><b>Commutative</b> — merge(a,b) = merge(b,a), so replicas can receive updates in any order;</li>
+<li><b>Associative</b> — grouping does not matter, so partial merges compose;</li>
+<li><b>Idempotent</b> — merge(a,a) = a, so duplicated messages are harmless.</li>
+</ul>
+<p>If merge has these properties, every replica that has seen the same set of updates ends in the same state, no matter the order or duplication. Convergence stops being something you engineer and becomes something you prove once.</p>
+<h4>G-Counter and PN-Counter</h4>
+<p>A grow-only counter is a version vector where each replica only increments its own slot; the value is the sum, and merge is element-wise max. To support decrements, keep two G-Counters, P and N; value = sum(P) − sum(N). Each replica writes only to its own slots, so there is never a conflicting update to the same slot.</p>
+<h4>OR-Set (observed-remove set)</h4>
+<p>Adding is easy; removing is where sets get hard, because a remove that arrives at a replica before the add it refers to must not "win" forever. The OR-Set tags every add with a unique ID. Remove records the set of tags it observed. An element is present if it has at least one tag not in the removed set. Concurrent add and remove of the same element resolves as: the add wins, because the remover could not have observed the new tag. Metadata grows with the number of operations, which is the cost you pay.</p>
+<h4>LWW-Register</h4>
+<p>LWW itself is a CRDT if you accept its semantics: merge keeps the higher (timestamp, node) pair. The point is that being a CRDT says the merge converges, not that it keeps what you want.</p>
+
+<h3>When to use them</h3>
+<p>CRDTs shine where every region must accept writes without coordination and the data has natural merge semantics: presence, likes, collaborative editing (with sequence CRDTs such as RGA or Yjs), shopping carts, feature usage counters. They are a poor fit where the invariant is global — an account balance must not go negative, a seat must not be sold twice — because no merge function can enforce a constraint that depends on the combined state. For those you accept the coordination cost of a leader (Chapter 6).</p>
+<div class="callout key">The decision is not "CRDT or not." It is: does this data have a merge that loses nothing I care about? If yes, a CRDT removes coordination. If no, no data structure will save you from needing an order.</div>
+
+<h3>Lab: diverge and merge</h3>
+<p>Two replicas, each holding a PN-Counter and an OR-Set. Edit them independently — increment on one, decrement on the other, add and remove the same element concurrently — then merge. The panel shows the internal state (per-replica slots, tags, tombstones) so you can see why the result is what it is. Try to produce a merge that loses an update. You will not manage it, and the internals show why.</p>
+`,
+hw:["Add the same element on both replicas, remove it on one, then merge. Explain the result using tags.","Design a version-vector scheme for the register in Chapter 1's simulator and describe how it would classify each anomaly the checker flags.","Pick one piece of state in an inference platform that could be a CRDT and one that could not, and explain the merge that does or does not exist."]
+};
+
+CH.s6 = {
+n:6, part:3, title:"Raft from scratch: election and log replication", widget:"raft", on:["s3","s2"],
+obj:["Explain why consensus is needed to choose a leader safely and what 'safely' means","Trace Raft's election: terms, randomized timeouts, RequestVote, majority","Trace log replication: AppendEntries, match/next index, the commit index","Predict Raft's behaviour when the leader crashes, a follower is partitioned, or votes split"],
+html:`
+<h3>The problem a leader creates</h3>
+<p>Chapter 3 gave us a leader and immediately raised two questions it could not answer: who picks the leader when it dies, and how do we make sure two nodes never both believe they are leader? A coordinator service could pick — but then who picks the coordinator? At some point a set of machines has to agree on a single value (the leader's identity, or more generally the next entry in a shared log) using only messages between themselves, some of which will be lost. That is the consensus problem.</p>
+<p>Raft (Ongaro & Ousterhout, 2014) solves it with a design chosen for understandability. Every serious coordination service you will touch — etcd (which Kubernetes stores its state in), Consul, CockroachDB, TiKV, many internal lock services — runs Raft or a close relative. You need to be able to reconstruct it on a whiteboard.</p>
+
+<h3>The shape of the solution</h3>
+<p>Every node is in one of three states: <b>follower</b>, <b>candidate</b>, or <b>leader</b>. Time is divided into <b>terms</b>, numbered consecutively. Each term has at most one leader. Nodes keep a <b>log</b> of entries; each entry has a term number and a command. The guarantee Raft provides: if two logs contain an entry with the same index and term, all preceding entries are identical, and any committed entry is present in the log of every future leader.</p>
+
+<h3>Election</h3>
+<p>Followers expect periodic <b>heartbeats</b> from the leader. Each follower has an election timeout chosen at random from a range (say 150–300 ms). If the timeout expires without a heartbeat, the follower assumes the leader is dead: it increments its term, becomes a candidate, votes for itself, and sends <code>RequestVote(term, lastLogIndex, lastLogTerm)</code> to everyone.</p>
+<p>A node grants its vote if it has not voted in this term already and the candidate's log is <em>at least as up to date</em> as its own — meaning the candidate's last entry has a higher term, or the same term and an index at least as large. This <b>election restriction</b> is what prevents a node with a stale log from winning and overwriting committed entries.</p>
+<p>A candidate that collects votes from a <b>majority</b> becomes leader and immediately sends heartbeats. If it hears from a leader with a term ≥ its own, it steps down. If the timeout expires with no majority — a <b>split vote</b>, when several nodes became candidates at once — it starts a new term and tries again. The randomized timeouts make repeated splits improbable: whoever times out first usually wins before anyone else wakes up.</p>
+<div class="callout">Why a majority? Two majorities of the same set always overlap. So two leaders in the same term would need a node that voted twice, which the one-vote-per-term rule forbids. This is the same overlap argument as Chapter 4's quorums, applied to votes.</div>
+
+<h3>Log replication</h3>
+<p>Clients send commands to the leader. The leader appends the entry to its log and sends <code>AppendEntries(term, prevLogIndex, prevLogTerm, entries, leaderCommit)</code> to each follower. A follower accepts only if its log has an entry at <code>prevLogIndex</code> with term <code>prevLogTerm</code>; this consistency check is how logs are forced to match. If the check fails, the leader decrements that follower's <b>nextIndex</b> and retries, walking back until it finds the point of agreement and then overwriting the follower's divergent suffix.</p>
+<p>Once an entry is stored on a majority, the leader marks it <b>committed</b> and advances its <b>commitIndex</b>. It applies the command to its state machine and replies to the client. Followers learn the commit index from the next AppendEntries and apply in turn. Note what "committed" means: durable on a majority, so any future leader — which must win a majority, and by the election restriction must have a log at least as complete as some node in that majority — is guaranteed to have it.</p>
+
+<h3>The failure scenarios you will be asked about</h3>
+<ul>
+<li><b>Leader crashes with uncommitted entries.</b> They exist on a minority. The new leader may or may not have them. If it does, they get committed when it replicates them; if not, they are overwritten. The client never got an acknowledgement, so nothing acknowledged is lost.</li>
+<li><b>Follower partitioned away, then returns.</b> Its term is stale; it may have started elections and incremented its term many times while isolated. On return, its higher term forces the current leader to step down and a fresh election runs — a real disruption. The Pre-Vote optimisation (checking whether you could win before incrementing your term) fixes it.</li>
+<li><b>Old leader keeps running after a partition.</b> It cannot commit anything because it cannot reach a majority. When it reconnects it sees a higher term and steps down. Its uncommitted entries are discarded.</li>
+<li><b>Two candidates in the same term.</b> Split vote; nobody wins; randomized timeouts resolve it in the next term.</li>
+</ul>
+
+<h3>What Raft costs</h3>
+<p>Every write is a round trip to a majority before acknowledgement, plus the leader is a serialization point. Throughput is bounded by one node's ability to sequence entries, and latency by the median follower's distance. This is why Raft clusters are small (3, 5, 7 nodes) and hold metadata and coordination state, not bulk data: Kubernetes objects, lock leases, membership, shard assignments. Chapter 7 covers the pieces that make it operable (snapshots, membership change) and how Paxos and ZAB differ.</p>
+
+<h3>Lab: run a cluster</h3>
+<p>Five nodes with randomized election timeouts, heartbeats, and a log. Watch an election happen on start. <b>Crash the leader</b> and watch a new term begin. <b>Partition a node</b> and see it fail to win elections; <b>heal</b> it and see its inflated term disrupt the cluster (Pre-Vote is off, on purpose). Send client writes and follow the entry from the leader's log to a majority to the commit index. Slow the simulation down to read every message.</p>
+`,
+hw:["Crash the leader immediately after sending a write, before the commit index advances. Trace what happens to that entry under the new leader. Was anything acknowledged and then lost?","Partition a follower for 30 simulated seconds, then heal it. Count the disruption. Describe the Pre-Vote check that would prevent it.","Write the pseudocode for the AppendEntries consistency check and the nextIndex walk-back."]
+};
+// Scaffolded chapters: [id, part, title, buildsOn, objectives, outline]
+const STUBS = [
+["s7",3,"Raft, part 2: safety, snapshots, membership; Paxos and ZAB",["s6"],["State and justify the Leader Completeness and State Machine Safety properties","Explain log compaction via snapshots and InstallSnapshot","Perform a safe membership change with joint consensus","Map Raft concepts onto Paxos (Multi-Paxos) and ZAB"],["Why an entry replicated on a majority is not yet committed if from an old term (figure 8 in the paper)","Snapshots: what is discarded, how a lagging follower catches up","Joint consensus vs single-server changes","Paxos roles (proposer/acceptor/learner) and why Multi-Paxos looks like Raft","ZAB in ZooKeeper; etcd and ZooKeeper APIs compared"]],
+["s8",3,"Leases, locks, and fencing",["s7","s3"],["Show why a distributed lock without fencing is unsafe","Implement a lease with renewal and expiry on Raft","Use fencing tokens to make a stale lock holder harmless"],["The GC-pause scenario: holder pauses, lease expires, second holder acts, first resumes","Lease = lock with a deadline; renewal, clock assumptions","Fencing tokens: monotonic counter checked by the protected resource","etcd lease API and Kubernetes leader election","Chubby/ZooKeeper recipes and their failure modes"]],
+["s9",3,"Idempotency and exactly-once",["s8","s3"],["Decompose 'exactly-once' into at-least-once delivery plus idempotent processing","Design idempotency keys with storage, TTL and response replay","Implement the transactional outbox and contrast sagas with two-phase commit"],["Why exactly-once delivery is impossible and exactly-once effect is not","Idempotency keys: scope, TTL, storing the response","Outbox pattern: write event with state in one transaction, relay separately","Sagas and compensating actions; when 2PC is acceptable","Case: an order service that crashes mid-flight and is replayed"]],
+["s10",3,"Partitioning and rebalancing",["s4"],["Choose between range and hash partitioning for a workload","Implement consistent hashing with virtual nodes and measure key movement","Mitigate hot keys and reason about local vs global secondary indexes"],["Range partitioning: ordered scans vs hotspots","Hash partitioning; consistent hashing; why vnodes smooth load","Rebalancing strategies: fixed partitions, dynamic splitting, proportional to nodes","Hot keys: salting, splitting, request coalescing","Secondary indexes: scatter/gather (local) vs term-partitioned (global)"]],
+["s11",3,"Time and ordering",["s5","s4"],["Explain why wall clocks cannot order events across machines","Implement Lamport and hybrid logical clocks","Describe how Spanner's TrueTime buys external consistency"],["Clock drift, NTP, leap seconds, monotonic clocks","Lamport timestamps and the happens-before relation","Vector clocks vs version vectors","Hybrid logical clocks: physical + logical, bounded drift","TrueTime and commit-wait"]],
+["s12",3,"Resilience patterns",["s9","s2"],["Design timeouts and retries that cannot create a retry storm","Apply circuit breakers, bulkheads, load shedding and admission control","Reason about backpressure end to end"],["Timeouts as budgets; deadlines propagate","Exponential backoff with jitter; retry budgets (10% rule)","Circuit breaker states; bulkheads by tenant or dependency","Load shedding by priority; CoDel-style queue management","Backpressure vs unbounded queues; where the queue should be"]],
+["s13",3,"Failure detection and blast-radius control",["s12","s6"],["Implement heartbeat and phi-accrual failure detectors","Explain SWIM-style gossip membership","Design cells and shuffle sharding to contain a bad tenant"],["Unreliable failure detectors: completeness vs accuracy","Phi-accrual: adaptive suspicion","Gossip dissemination and anti-entropy for membership","Cell architecture; shuffle sharding math","Staged rollouts as blast-radius control"]],
+["s14",4,"Kafka internals",["s10","s3"],["Explain partitions, offsets, consumer groups and rebalancing","Choose acks and ISR settings for a durability target","Reason about ordering, compaction and transactions"],["Log-structured storage; segments; retention","Leader/ISR replication; acks=0/1/all; min.insync.replicas","Consumer groups, offsets, rebalance protocols","Compacted topics; exactly-once transactions","Operating pitfalls: rebalance storms, hot partitions"]],
+["s15",4,"Queues, delivery semantics, and dead letters",["s14","s9"],["Contrast queue semantics with log semantics","Implement visibility timeouts and dead-letter queues","Handle poison messages safely"],["SQS model: visibility timeout, at-least-once","Idempotent consumers revisited","DLQs and redrive","Fan-out: topics, subscriptions, filters","When to pick a queue over Kafka"]],
+["s16",4,"Storage engines: B-trees vs LSM trees",["s10"],["Explain B-tree and LSM write paths and their amplification tradeoffs","Describe WAL and fsync durability","Choose an engine for a workload"],["Pages, B-tree splits, WAL","Memtable, SSTables, compaction (leveled vs tiered), bloom filters","Write/read/space amplification","RocksDB, InnoDB, Postgres heap comparison","Benchmark a mini LSM vs SQLite"]],
+["s17",4,"Transactions, MVCC, and isolation",["s16","s9"],["Name the anomalies each isolation level allows","Explain snapshot isolation and MVCC internals","Reproduce and fix write skew"],["Dirty read, non-repeatable read, phantom, lost update, write skew","Read committed, repeatable read, snapshot isolation, serializable","MVCC tuple versions, vacuum, xmin/xmax","SSI and its false positives","Postgres demo: write skew at RR, fixed at SERIALIZABLE"]],
+["s18",4,"Object storage and transactional KV stores",["s16","s10"],["Describe S3 semantics and cost model","Design a blob/metadata split","Explain FoundationDB's layer model"],["Object storage: consistency, multipart, listing, lifecycle","Metadata in a transactional store, blobs in object storage","FoundationDB: ordered KV, ACID, layers, simulation testing","Designing a file service on top","Costs: requests vs storage vs egress"]],
+["s19",4,"Caching in depth",["s18","s12"],["Choose a caching pattern and eviction policy","Prevent cache stampedes three ways","Shard a cache tier and handle hot keys"],["Redis data structures and eviction (LRU/LFU/TTL)","Cache-aside, write-through, write-behind","Stampedes: locking, request coalescing, probabilistic early expiry","Invalidation strategies and TTL vs event-driven","Consistent-hash client sharding; hot keys; replication vs sharding"]],
+["s20",4,"Distributed cache design case study",["s19","s13"],["Design a fleet-wide caching tier for multiple tenants","Critique a flawed cache design document","Reason about warmup and tail latency"],["Requirements: tenants, sizes, hit ratio targets","Sharding vs replication; warm standby","Tenant isolation and fairness","Tail latency: hedged requests","Design-doc critique exercise"]],
+["s21",4,"Durable workflow orchestration",["s9","s15"],["Explain Temporal's durable execution model","Write a deterministic workflow with activities, retries, signals","Decide between orchestration and queue + state machine"],["Event history and replay","Workflows vs activities; determinism constraints","Timers, signals, queries, versioning","Model deployment workflow demo","Alternatives: Cadence, Step Functions, hand-rolled state machines"]],
+["s22",5,"The design method and estimation",["s1","s12"],["Run a repeatable design method under time pressure","Do back-of-envelope estimation with confidence","Articulate tradeoffs explicitly"],["Requirements, scope, non-goals","Estimation: QPS, storage, bandwidth, cost","API and data model first","Deep dive selection","Scaling 10x/100x/1000x; failure enumeration"]],
+["s23",5,"Critiquing a design document",["s22","s12","s13"],["Read an unfamiliar architecture fast","Find missing overload protection, SPOFs, unbounded queues, missing idempotency","Write a constructive critique"],["A reading protocol for design docs","Checklist: flow, failure, overload, cost, security","Three flawed docs: inference service, batch pipeline, GPU job queue","Writing the critique","How reviewers at labs run this round"]],
+["s24",5,"Payment processing",["s9","s17","s22"],["Design an idempotent payment system with a double-entry ledger","Handle PSP retries and timeouts","Reconcile and audit"],["Idempotency keys end to end","Double-entry ledger schema","Payment state machine","External PSP: timeouts, retries, webhooks","Reconciliation jobs and audit trails"]],
+["s25",5,"Distributed job scheduler / cron",["s8","s15","s22"],["Design leader-elected scheduling with lease-based workers","Guarantee at-least-once execution with idempotent jobs","Support priorities, DAGs and backfills"],["Leader election for the scheduler","Leases on job claims; requeue on expiry","Priority queues; fairness","DAG dependencies; misfires; backfills","Build on the S8 lock service"]],
+["s26",5,"Chat system at Slack scale",["s14","s19","s22"],["Design connection gateways and fan-out","Preserve per-channel ordering","Scale storage and search"],["WebSocket gateways; presence","Fan-out: push vs pull; large channels","Ordering and message IDs","Storage partitioning by channel/time","Search indexing; read receipts; 100x follow-ups"]],
+["s27",5,"Rate limiter as a service",["s19","s12"],["Implement token bucket and sliding window limiters","Make them correct across a fleet","Support token-based limits and fairness"],["Algorithms compared","Local vs global tiers","Redis + Lua atomicity","Distributed counters and approximation","Token-based limits for LLM APIs"]],
+["s28",5,"Streaming video and CDN / file cache",["s19","s10"],["Design ingest/transcode/ABR pipelines","Design a multi-tier CDN with invalidation","Handle hot objects"],["Ingest and transcoding","Adaptive bitrate and manifests","CDN hierarchy; consistent hashing; invalidation","Hot objects and Zipfian load","Lab: two-tier cache hit rates"]],
+["s29",5,"Geo services and ephemeral dev environments",["s10","s22"],["Index locations with geohash and quadtrees","Design a CI/CD devbox platform","Reason about secrets and teardown"],["Geohash, quadtree, S2 cells","Read-heavy caching for geo","Devbox: container scheduling, images, caches","Secrets and network isolation","Lifecycle and cost control"]],
+["s30",5,"Streaming-response web application",["s26","s12"],["Choose between SSE and WebSockets","Handle aborts and partial failures","Apply backpressure to a client"],["HTTP streaming primitives","Token-by-token rendering","Abort propagation to the backend","Retries for streams","Backpressure and flow control"]],
+["s31",5,"Design mock marathon",["s22","s23","s24","s25","s26","s27"],["Deliver a design in 25 minutes","Withstand hostile scale and failure questioning","Self-assess tradeoff articulation"],["Four rapid designs","Rotating hostile interviewer","Debrief rubric","Common failure patterns","Next steps"]],
+["s32",6,"The inference request path",["s22"],["Describe tokenization → prefill → decode → streaming","Explain compute-bound vs memory-bandwidth-bound phases","Define TTFT and inter-token latency"],["Tokens and the KV cache at a glance","Prefill: parallel over prompt, compute-bound","Decode: one token per step, bandwidth-bound","Roofline intuition","Lab: naive serving loop, watch utilization collapse"]],
+["s33",6,"Batching: static to continuous",["s32","s12"],["Explain padding waste in static batching","Describe iteration-level scheduling","Measure throughput vs latency tradeoffs"],["Static batching and padding","Continuous batching: admit between decode steps","Scheduler policies","Latency/throughput curves","Lab: toy continuous-batching scheduler"]],
+["s34",6,"KV cache, paged attention, prefix caching",["s33","s19"],["Compute KV memory for a model and context","Explain paged attention and block tables","Explain prefix/radix caching and eviction"],["KV cache size arithmetic","Fragmentation and paging","vLLM block manager walkthrough","SGLang RadixAttention walkthrough","Lab: shared system prompt benchmark"]],
+["s35",6,"Chunked prefill, disaggregation, speculative decoding, quantization",["s34"],["Explain head-of-line blocking and chunked prefill","Describe prefill/decode disaggregation and KV transfer","Give the systems view of speculative decoding and quantization"],["HOL blocking of decode by long prompts","Chunked prefill","Disaggregated serving and KV transfer costs","Speculative decoding: draft/verify","Quantization as a memory lever; lab on p99 ITL"]],
+["s36",6,"Routing and load balancing for model fleets",["s35","s27","s12"],["Compare routing strategies for LLM replicas","Implement KV-cache-aware routing","Isolate tail requests"],["Least-outstanding-requests","Cache-aware routing and prefix hashing","Session affinity for multi-turn","Multi-model/multi-version routing","Lab: router in Go/Rust vs round-robin"]],
+["s37",6,"Fleet operations: rollout, autoscaling, multi-region",["s36","s13"],["Design model rollout pipelines with canary and rollback","Autoscale GPU pools under slow scale-up","Route across regions with residency constraints"],["Weight loading and warmup","Shadow, canary, rollback","Predictive vs reactive autoscaling; preemption of research jobs","Geographic routing; failover; residency","Lab: canary controller with auto-rollback"]],
+["s38",6,"Quotas, fairness, cost, and SLOs for an inference API",["s37","s27"],["Design token-based rate limits and per-tenant quotas","Reason about fair queueing and batch tiers","Pick SLOs and efficiency metrics"],["Tokens/min vs requests/min","Fair queueing across tenants","Batch API economics","Tokens/sec/GPU","SLO dashboard design"]],
+["s39",7,"Kubernetes control plane internals",["s7","s8"],["Trace a Pod from apply to running","Explain the watch/informer model","Describe scheduler filter/score pipeline"],["API server, etcd, watches","Controllers and reconciliation","Scheduler pipeline","kubelet, CRI, CNI, CSI","Lab: trace on kind with audit logs"]],
+["s40",7,"Workloads, resources, and disruption",["s39"],["Choose workload types correctly","Set requests/limits and understand QoS","Design probes and graceful termination"],["Deployment/StatefulSet/DaemonSet/Job","Requests, limits, QoS classes","PDBs and rolling updates","Probes and termination grace","Lab: OOM-kill vs CPU throttling"]],
+["s41",7,"Scheduling and autoscaling",["s40","s37"],["Use taints, affinity, topology spread","Configure priority and preemption","Explain HPA/VPA/cluster autoscaler limits for GPUs"],["Placement constraints","Priority classes and preemption","HPA, VPA, cluster autoscaler","Why GPU autoscaling is slow","Lab: research vs production preemption"]],
+["s42",7,"Networking and service mesh",["s39","s12"],["Explain Services, kube-proxy, DNS, Ingress/Gateway","Describe Envoy and mTLS","Prevent retry amplification between mesh and app"],["Cluster networking model","Services and IPVS","Ingress vs Gateway API","Envoy basics; Istio","Lab: retry amplification and budgets"]],
+["s43",7,"Extending Kubernetes: operators and webhooks",["s39","s21"],["Write a controller with controller-runtime","Design a CRD with finalizers","Enforce policy with admission webhooks"],["CRDs and schemas","Reconcile loops, informers, work queues","Finalizers and ownership","Validating/mutating webhooks","Lab: ModelDeployment operator for vLLM"]],
+["s44",7,"GPU scheduling on Kubernetes",["s41","s43"],["Explain device plugins and NFD","Use MIG/time-slicing appropriately","Schedule gang jobs with Kueue/Volcano"],["Device plugin model","MIG and time-slicing","Gang scheduling","Topology-aware placement (NVLink/NCCL)","Lab: Kueue gang job"]],
+["s45",7,"IaC and delivery: Terraform, Helm, GitOps",["s43"],["Manage Terraform state, modules, drift","Structure Helm charts and Kustomize overlays","Run GitOps with Argo CD"],["Terraform fundamentals and pitfalls","Helm chart structure","Kustomize","Argo CD app-of-apps","Secrets: External Secrets, sealed secrets"]],
+["s46",7,"Cloud primitives and containers",["s45"],["Design VPCs, IAM, managed services on AWS/GCP","Use spot capacity safely","Build minimal images and sandbox untrusted code"],["VPC, subnets, security groups, LBs","IAM least privilege","EKS vs GKE; managed data services","Spot/preemptible strategy","Images, cgroups, gVisor/Firecracker/seccomp"]],
+["s47",8,"SLIs, SLOs, error budgets",["s38","s12"],["Choose SLIs for an inference API","Set SLOs and error budgets","Implement burn-rate alerts"],["SLI selection","SLO targets and windows","Error budgets and policy","Multi-window burn-rate alerting","Lab on the router"]],
+["s48",8,"Observability stack",["s47"],["Use Prometheus metric types correctly","Avoid cardinality traps","Trace requests with OpenTelemetry"],["Counters, gauges, histograms vs summaries","Cardinality","Structured logging and sampling","OpenTelemetry tracing and propagation","Lab: dashboard and trace"]],
+["s49",8,"Profiling and performance debugging",["s48"],["Use continuous profiling and flame graphs","Profile Python and Go services","Read GPU profiles"],["pprof, py-spy","Flame graphs","Continuous profiling","Nsight Systems basics","Lab: fix a hot spot and a stall"]],
+["s50",8,"Incident response and postmortems",["s47","s13"],["Run an incident with roles and severity","Write a blameless postmortem","Design on-call and alert quality"],["Severity and roles","Runbooks","Postmortem structure and action items","On-call design","Lab: game day"]],
+["s51",8,"Deployment safety and capacity planning",["s37","s47"],["Design canaries, flags, auto-rollback","Forecast capacity and set headroom","Run open-loop load tests and chaos experiments"],["Progressive delivery","Config as code","Forecasting and headroom","Open vs closed loop load testing","Lab: find the overload cliff"]],
+["s52",9,"Flink and stream processing semantics",["s14","s11"],["Distinguish event and processing time","Use watermarks and windows with late data","Explain checkpointing and exactly-once sinks"],["Time semantics","Watermarks and lateness","Windows","Checkpoints and state backends","Lab: per-tenant token usage"]],
+["s53",9,"Spark for large-scale batch",["s10"],["Read a Spark DAG and stage boundaries","Diagnose and fix skew","Tune memory and shuffles"],["Lazy DAG and stages","Shuffles and partitioning","Skew: salting, broadcast joins","AQE","Lab: Spark UI"]],
+["s54",9,"Trino and the lakehouse",["s53","s18"],["Explain MPP query execution","Use Iceberg table format features","Compare Iceberg, Delta, Hudi"],["Trino architecture and connectors","Iceberg snapshots, hidden partitioning, evolution","Catalogs","Lakehouse layering","Lab: write, query, time-travel"]],
+["s55",9,"Orchestration with Airflow/Dagster",["s21","s53"],["Design idempotent DAG tasks","Run backfills safely","Use sensors and data-aware scheduling"],["DAG design","Idempotency and retries","Backfills","Sensors and assets","Lab: training-data pipeline"]],
+["s56",9,"Data platform concerns",["s55","s52"],["Dedup at scale and reconcile late data","Add data-quality checks and lineage","Govern access to training data"],["Deduplication strategies","Late data reconciliation","Quality checks","Lineage (OpenLineage)","Access control and governance"]],
+["s57",10,"Linux processes, scheduling, and memory",["s46"],["Explain the process/thread model and CFS","Describe page cache, THP, NUMA, OOM killer","Use cgroups v2 and namespaces"],["Processes and threads","CFS scheduling","Memory subsystem","cgroups v2","Lab: OOM in a cgroup"]],
+["s58",10,"I/O and kernel tuning",["s57"],["Explain fd limits, epoll, io_uring","Tune TCP and memory sysctls","Measure the effect"],["File descriptors","epoll and io_uring","TCP buffers, somaxconn","Hugepages","Lab: epoll echo server"]],
+["s59",10,"Performance tooling and eBPF",["s58","s49"],["Use perf, strace, ss, iostat, vmstat","Write bpftrace one-liners","Describe Cilium"],["Tool survey","perf and flame graphs","eBPF programs and bpftrace","Cilium overview","Lab: trace slow syscalls"]],
+["s60",10,"Networking: TCP through HTTP/3",["s58"],["Explain TCP handshake and congestion control","Compare HTTP/1.1, 2, 3","Account for TLS costs"],["TCP internals","TLS handshakes","HTTP/2 multiplexing","QUIC and HTTP/3","Lab: packet captures"]],
+["s61",10,"gRPC, load balancing, and streaming transports",["s60","s30"],["Use gRPC streaming and deadlines","Avoid L4 balancing pitfalls","Choose SSE vs WebSockets"],["gRPC internals","Deadlines and cancellation","L4 vs L7 balancing; connection pooling","DNS and anycast","Lab: gRPC pinning fix"]],
+["s62",10,"Datacenter fabrics and GPU architecture",["s60","s32"],["Explain RDMA/RoCE/InfiniBand","Describe SMs, HBM, bandwidth, roofline","Compare NVLink/NVSwitch and PCIe"],["Frontend vs backend networks","RDMA basics","GPU architecture","Roofline for decode","Lab: nvidia-smi and Nsight"]],
+["s63",10,"Collectives, parallelism, and cluster schedulers",["s62","s44"],["Explain NCCL collectives and topology","Define data/tensor/pipeline/expert parallelism","Describe Slurm and bare-metal automation"],["All-reduce, all-gather, reduce-scatter","Ring vs tree","Parallelism strategies","NCCL timeouts postmortem","Slurm; TPU/Trainium differences"]],
+["s64",11,"Securing an AI platform",["s46","s38"],["Threat-model an inference API","Apply encryption, KMS, envelope encryption","Rotate keys without downtime"],["Prompts as PII","Tenant isolation","Log redaction and retention","KMS and envelope encryption","Lab: field-level encryption"]],
+["s65",11,"AuthN/AuthZ, supply chain, compliance",["s64"],["Implement OAuth2/OIDC, API keys, RBAC/ABAC","Sign images and enforce with admission","Speak SOC 2 and GDPR residency"],["Authentication flows","Authorization models","cosign, SBOMs, pinning","Compliance vocabulary","Lab: signed images via webhook"]],
+["s66",12,"Scoping ambiguous multi-month projects",["s23"],["Turn a one-line ask into a design doc","Write options analysis and decision records","Define milestones and exit criteria"],["Problem framing","Options and tradeoffs","Decision records","Milestones and risks","Lab: multi-region failover design doc"]],
+["s67",12,"Design review, alignment, and mentoring",["s66"],["Run a design review","Resolve disagreement constructively","Set standards and mentor"],["Review formats","Disagreement and alignment","Standards others build on","Mentoring patterns","Lab: mock review of S66 doc"]],
+["s68",13,"Anthropic and OpenAI: strategy and stance",[],["Summarize each lab's published safety stance","Explain corporate structures and founding stories","Form a critique"],["Core Views, RSP, Constitution","Charter and Preparedness Framework","Founding and structure","Infrastructure organizations","Discussion"]],
+["s69",13,"The frontier-lab landscape",["s68"],["Compare compute strategies across labs","Explain compute as the binding constraint","Map public disclosures to systems in this book"],["DeepMind, xAI, Mistral, Meta","Open vs closed models","Compute economics","Infrastructure disclosures","Mapping exercise"]],
+["s70",14,"Capstone 1: serving core",["s43","s34","s44"],["Deploy vLLM on Kubernetes via the operator","Expose an OpenAI-compatible API","Baseline TTFT/ITL metrics"],["Cluster and GPU node","Operator deploy","API surface","Metrics baseline","Checkpoint"]],
+["s71",14,"Capstone 2: router and limits",["s70","s36","s27","s48"],["Finish the cache-aware router","Add per-tenant token buckets and admission control","Integrate tracing"],["Router completion","Rate limits","Admission control","Tracing","Checkpoint"]],
+["s72",14,"Capstone 3: rollout and reliability",["s71","s37","s47","s50"],["Canary rollout with auto-rollback","SLO dashboards and burn-rate alerts","Runbook and game day"],["Canary controller","Dashboards","Alerts","Runbook","Game day"]],
+["s73",14,"Capstone 4: load, overload, and design review",["s72","s51","s23"],["Load test to the cliff and fix","Write the design doc","Survive a hostile review"],["Open-loop load test","Fixes","Design doc","Review","Retrospective"]],
+];
+for (const [id,part,title,on,obj,outline] of STUBS) CH[id] = {n:+id.slice(1),part,title,on,obj,outline,stub:true};
+
+const PARTS = [
+[3,"Distributed systems fundamentals"],[4,"Messaging, storage, caching, orchestration"],[5,"System design method and canonical systems"],
+[6,"LLM inference infrastructure"],[7,"Kubernetes, cloud, and IaC"],[8,"Production operations and reliability"],[9,"Data infrastructure"],
+[10,"Low-level systems"],[11,"Security and privacy engineering"],[12,"Staff-level engineering practice"],[13,"Domain context"],[14,"Capstone build"]];
+// ---------- Widgets ----------
+const WIDGETS = {};
+function mkLog(el){ const log=el.querySelector('.log'); return (cls,msg)=>{ const t=((performance.now()-el._t0)/1000).toFixed(1); const d=document.createElement('div'); d.innerHTML='<span class="t">'+t+'s</span> <span class="'+cls+'">'+msg+'</span>'; log.appendChild(d); log.scrollTop=log.scrollHeight; if(log.children.length>300) log.removeChild(log.firstChild); }; }
+function h(tag,attrs,html){ const e=document.createElement(tag); for(const k in attrs||{}) e.setAttribute(k,attrs[k]); if(html!=null) e.innerHTML=html; return e; }
+function labShell(title,hint,controlsHTML,stageHTML,single){ return '<div class="lab"><header><h4>'+title+'</h4><span class="hint">'+hint+'</span></header><div class="controls">'+controlsHTML+'</div><div class="body'+(single?' single':'')+'"><div class="stage">'+stageHTML+'</div>'+(single?'':'<div class="log" aria-live="polite"></div>')+'</div></div>'; }
+const S = (s)=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+
+// 0. Unreliable network
+WIDGETS.network = function(root){
+  root.innerHTML = labShell('Client, server, and the network between','The client sees only responses and timeouts. It never sees what the server did.',
+   '<label>Loss <input type="range" id="n-loss" min="0" max="60" value="25"> <span id="n-lossv">25%</span></label>'+
+   '<label>Delay <input type="range" id="n-delay" min="100" max="2500" step="100" value="600"> <span id="n-delayv">0.6s</span></label>'+
+   '<label>Duplication <input type="range" id="n-dup" min="0" max="50" value="15"> <span id="n-dupv">15%</span></label>'+
+   '<label>Client timeout <input type="range" id="n-to" min="500" max="4000" step="100" value="1500"> <span id="n-tov">1.5s</span></label>'+
+   '<label><input type="checkbox" id="n-idem"> idempotent server</label>'+
+   '<button id="n-send">Send request</button><button class="secondary" id="n-retry" disabled>Retry last</button><button class="warn" id="n-crash">Crash after processing (next)</button><button class="secondary" id="n-reset">Reset</button>',
+   '<svg viewBox="0 0 560 190" id="n-svg"></svg><div class="stats"><div class="stat"><b id="n-intended">0</b><span>charges the client intended</span></div><div class="stat"><b id="n-applied" style="color:var(--warn)">0</b><span>charges the server applied</span></div><div class="stat"><b id="n-resp">0</b><span>responses received</span></div><div class="stat"><b id="n-tout" style="color:var(--ink-3)">0</b><span>timeouts</span></div></div>');
+  root._t0=performance.now(); const log=mkLog(root);
+  const g=id=>root.querySelector('#'+id); const val=id=>+g(id).value;
+  [['loss','%',1],['delay','s',1000],['dup','%',1],['to','s',1000]].forEach(([k,u,d])=>{ g('n-'+k).oninput=()=>{ const v=val('n-'+k); g('n-'+k+'v').textContent=(d===1?v:(v/d).toFixed(1))+u; }; });
+  let msgs, reqSeq, intended, applied, resp, tout, pending, seen, lastId, armed, serverDeadUntil;
+  function reset(){ msgs=[]; reqSeq=0; intended=0; applied=0; resp=0; tout=0; pending={}; seen={}; lastId=null; armed=false; serverDeadUntil=0; g('n-retry').disabled=true; g('n-crash').textContent='Crash after processing (next)'; root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  function net(m){ const now=performance.now(); if(Math.random()*100<val('n-loss')){ log('t',(m.dir==='req'?'request':'response')+' #'+m.id+' lost in the network'); return; } const copies=(Math.random()*100<val('n-dup'))?2:1; for(let c=0;c<copies;c++){ msgs.push(Object.assign({},m,{start:now,at:now+val('n-delay')*(0.6+Math.random()*0.8)})); } if(copies>1) log('t',(m.dir==='req'?'request':'response')+' #'+m.id+' duplicated by the network'); }
+  function send(id,isRetry){ const now=performance.now(); if(!isRetry){ intended++; } lastId=id; pending[id]={sentAt:now,deadline:now+val('n-to')}; log('info','client → server: charge #'+id+(isRetry?' (retry)':'')); net({dir:'req',id}); g('n-retry').disabled=false; }
+  g('n-send').onclick=()=>{ reqSeq++; send(reqSeq,false); };
+  g('n-retry').onclick=()=>{ if(lastId!=null) send(lastId,true); };
+  g('n-crash').onclick=e=>{ armed=!armed; e.target.textContent=armed?'Armed: will crash after next processing':'Crash after processing (next)'; };
+  g('n-reset').onclick=reset;
+  function serverReceive(m){ const now=performance.now(); if(now<serverDeadUntil){ log('t','server is down; request #'+m.id+' dropped'); return; } const idem=g('n-idem').checked; if(idem && seen[m.id]){ log('ok','server: already processed #'+m.id+', replying with cached result (no new charge)'); } else { applied++; seen[m.id]=true; log(idem?'ok':'warn','server: processed charge #'+m.id+' → total applied '+applied); }
+    if(armed){ armed=false; g('n-crash').textContent='Crash after processing (next)'; serverDeadUntil=now+3000; log('bad','server crashed right after processing #'+m.id+' — no response will be sent'); return; }
+    net({dir:'resp',id:m.id}); }
+  function clientReceive(m){ if(pending[m.id]){ delete pending[m.id]; resp++; log('ok','client ← server: charge #'+m.id+' confirmed'); } else { log('t','client: duplicate/late response for #'+m.id+' ignored'); } }
+  function tick(){ const now=performance.now(); const due=[]; msgs=msgs.filter(m=>{ if(now>=m.at){ due.push(m); return false;} return true; }); due.forEach(m=>{ if(m.dir==='req') serverReceive(m); else clientReceive(m); });
+    for(const id in pending){ if(now>=pending[id].deadline){ delete pending[id]; tout++; log('warn','client: TIMEOUT waiting for #'+id+'. Did the charge happen? The client cannot know.'); } } draw(); }
+  function draw(){ const now=performance.now(); const down=now<serverDeadUntil; let s='<rect x="20" y="50" width="110" height="70" rx="6" class="node"/><text x="35" y="75" class="lbl">client</text><text x="35" y="100" class="val">wants '+intended+'</text>';
+    s+='<rect x="430" y="50" width="110" height="70" rx="6" class="node'+(down?' dead':'')+'"/><text x="445" y="75" class="lbl">server'+(down?' (down)':'')+'</text><text x="445" y="100" class="val">applied '+applied+'</text>';
+    s+='<line x1="130" y1="85" x2="430" y2="85" stroke="#CBD3DF" stroke-dasharray="3 4"/><text x="235" y="150" class="lbl">the network: loss '+val('n-loss')+'% · dup '+val('n-dup')+'%</text>';
+    msgs.forEach(m=>{ const p=Math.min(1,(now-m.start)/Math.max(1,m.at-m.start)); const x=m.dir==='req'?130+300*p:430-300*p; const y=m.dir==='req'?70:100; s+='<circle cx="'+x+'" cy="'+y+'" r="6" class="msg'+(m.dir==='resp'?' stale':'')+'"/><text x="'+(x-8)+'" y="'+(y+(m.dir==='req'?-10:20))+'" class="lbl">#'+m.id+'</text>'; });
+    const pend=Object.keys(pending).length; s+='<text x="20" y="180" class="lbl">'+pend+' request(s) awaiting a response'+(down?' · server recovering':'')+'</text>';
+    g('n-svg').innerHTML=s; g('n-intended').textContent=intended; g('n-applied').textContent=applied; g('n-applied').style.color= applied===intended?'var(--ok)':'var(--warn)'; g('n-resp').textContent=resp; g('n-tout').textContent=tout; }
+  reset(); root._timer=setInterval(tick,60);
+};
+
+// 1. Consistency register
+WIDGETS.consistency = function(root){
+  root.innerHTML = labShell('Replicated register','Zero delay = linearizable. Raise it and watch anomalies appear.',
+   '<label>Propagation delay <input type="range" id="c-delay" min="0" max="3000" step="100" value="1200"> <span id="c-dv">1.2s</span></label>'+
+   '<label>Write to <select id="c-wt"><option>A</option><option>B</option><option>C</option></select></label><button id="c-w">Write next value</button>'+
+   '<label>Read from <select id="c-rt"><option>A</option><option>B</option><option>C</option></select></label><button class="secondary" id="c-r">Read</button><button class="secondary" id="c-reset">Reset</button>',
+   '<svg viewBox="0 0 560 190" id="c-svg"></svg><div class="stats"><div class="stat"><b id="c-st-w">0</b><span>acknowledged writes</span></div><div class="stat"><b id="c-st-s" style="color:var(--warn)">0</b><span>stale reads</span></div><div class="stat"><b id="c-st-m" style="color:var(--bad)">0</b><span>non-monotonic reads</span></div></div>');
+  root._t0=performance.now(); const log=mkLog(root);
+  const names=['A','B','C'], X=[100,280,460];
+  let rep, ver, acked, inflight, lastSeen, stats;
+  function reset(){ rep=names.map(()=>({val:'—',ver:0})); ver=0; acked=[]; inflight=[]; lastSeen=0; stats={w:0,s:0,m:0}; root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  const delay=()=>+root.querySelector('#c-delay').value;
+  root.querySelector('#c-delay').oninput=e=>root.querySelector('#c-dv').textContent=(e.target.value/1000).toFixed(1)+'s';
+  root.querySelector('#c-w').onclick=()=>{ const i=names.indexOf(root.querySelector('#c-wt').value); ver++; const val='v'+ver; rep[i]={val,ver}; acked.push({ver,val}); stats.w++; log('info','write '+val+' → '+names[i]+' acknowledged (ver '+ver+')'); const now=performance.now(); names.forEach((n,j)=>{ if(j!==i) inflight.push({from:i,to:j,val,ver,start:now,arrive:now+delay()}); }); };
+  root.querySelector('#c-r').onclick=()=>{ const i=names.indexOf(root.querySelector('#c-rt').value); const r=rep[i]; const newest=acked.length?acked[acked.length-1].ver:0; let msg='read '+names[i]+' → '+r.val+' (ver '+r.ver+')'; let cls='ok'; if(r.ver<lastSeen){ stats.m++; cls='bad'; msg+=' — NON-MONOTONIC: you already saw ver '+lastSeen; } else if(r.ver<newest){ stats.s++; cls='warn'; msg+=' — STALE: ver '+newest+' was acknowledged'; } lastSeen=Math.max(lastSeen,r.ver); log(cls,msg); };
+  root.querySelector('#c-reset').onclick=reset;
+  function tick(){ const now=performance.now(); inflight=inflight.filter(m=>{ if(now>=m.arrive){ if(m.ver>rep[m.to].ver){ rep[m.to]={val:m.val,ver:m.ver}; log('t',names[m.to]+' applied '+m.val); } return false;} return true;}); draw(); }
+  function draw(){ const svg=root.querySelector('#c-svg'); let s=''; names.forEach((n,i)=>{ s+='<rect x="'+(X[i]-45)+'" y="40" width="90" height="70" rx="6" class="node"/><text x="'+(X[i]-38)+'" y="60" class="lbl">replica '+n+'</text><text x="'+(X[i]-38)+'" y="88" class="val">'+rep[i].val+'</text><text x="'+(X[i]-38)+'" y="103" class="lbl">ver '+rep[i].ver+'</text>'; });
+    const now=performance.now(); inflight.forEach(m=>{ const p=Math.min(1,(now-m.start)/Math.max(1,m.arrive-m.start)); const x=X[m.from]+(X[m.to]-X[m.from])*p; const y=140+Math.sin(p*Math.PI)*20*(m.to>m.from?1:-1); s+='<circle cx="'+x+'" cy="'+y+'" r="6" class="msg"/>'; });
+    s+='<text x="20" y="180" class="lbl">'+inflight.length+' message(s) in flight</text>'; svg.innerHTML=s;
+    root.querySelector('#c-st-w').textContent=stats.w; root.querySelector('#c-st-s').textContent=stats.s; root.querySelector('#c-st-m').textContent=stats.m; }
+  reset(); root._timer=setInterval(tick,60);
+};
+
+// 2. CAP partition
+WIDGETS.cap = function(root){
+  root.innerHTML = labShell('Partition switch','A and B stay connected; C is cut off when partitioned.',
+   '<label>Mode <select id="p-mode"><option value="CP">CP — refuse if no majority</option><option value="AP">AP — always answer</option></select></label>'+
+   '<button id="p-traffic">Start traffic</button><button class="warn" id="p-part">Partition C</button><button class="secondary" id="p-reset">Reset</button>',
+   '<svg viewBox="0 0 560 150" id="p-svg"></svg><div class="stats"><div class="stat"><b id="p-ok">0</b><span>answered</span></div><div class="stat"><b id="p-ref" style="color:var(--ink-3)">0</b><span>refused</span></div><div class="stat"><b id="p-stale" style="color:var(--warn)">0</b><span>stale reads</span></div><div class="stat"><b id="p-conf" style="color:var(--bad)">0</b><span>conflicting writes</span></div></div>');
+  root._t0=performance.now(); const log=mkLog(root);
+  const names=['A','B','C'], X=[100,280,460];
+  let rep, ver, partitioned, traffic, st, minorityWrites, inflight;
+  function reset(){ rep=[{val:'v0',ver:0},{val:'v0',ver:0},{val:'v0',ver:0}]; ver=0; partitioned=false; traffic=false; st={ok:0,ref:0,stale:0,conf:0}; minorityWrites=0; inflight=[]; root.querySelector('#p-traffic').textContent='Start traffic'; root.querySelector('#p-part').textContent='Partition C'; root.querySelector('#p-part').className='warn'; root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  const mode=()=>root.querySelector('#p-mode').value;
+  const canReach=(i,j)=> !partitioned || (i<2 && j<2) || i===j;
+  const inMajority=(i)=> !partitioned || i<2;
+  function op(){ const i=Math.floor(Math.random()*3); const isWrite=Math.random()<0.4; const now=performance.now();
+    if(mode()==='CP' && !inMajority(i)){ st.ref++; log('t',(isWrite?'write':'read')+' at C refused: cannot reach a majority'); return; }
+    if(isWrite){ if(!inMajority(i)){ minorityWrites++; rep[i]={val:'c'+(minorityWrites),ver:rep[i].ver+1}; st.ok++; log('warn','write '+rep[i].val+' accepted at C (minority side)'); }
+      else { ver++; const val='v'+ver; rep[i]={val,ver}; st.ok++; log('info','write '+val+' at '+names[i]); names.forEach((n,j)=>{ if(j!==i) inflight.push({to:j,val,ver,arrive:now+300+Math.random()*200,from:i}); }); } }
+    else { const newest=ver; const r=rep[i]; st.ok++; if(r.ver<newest && inMajority(i)===false || (r.val.startsWith('v') && r.ver<newest)){ st.stale++; log('warn','read '+names[i]+' → '+r.val+' — stale (newest is v'+newest+')'); } else if(r.val.startsWith('c')){ st.stale++; log('warn','read C → '+r.val+' — value nobody else will ever see'); } else log('ok','read '+names[i]+' → '+r.val); } }
+  root.querySelector('#p-traffic').onclick=e=>{ traffic=!traffic; e.target.textContent=traffic?'Stop traffic':'Start traffic'; };
+  root.querySelector('#p-part').onclick=e=>{ partitioned=!partitioned; if(partitioned){ minorityWrites=0; e.target.textContent='Heal partition'; e.target.className='bad'; log('bad','partition: C can no longer reach A or B'); } else { e.target.textContent='Partition C'; e.target.className='warn'; if(minorityWrites>0){ st.conf+=minorityWrites; log('bad','healed: C accepted '+minorityWrites+' write(s) that conflict with the majority; discarding them (last-writer-wins by majority)'); } else log('ok','healed: no conflicts'); rep[2]={val:'v'+ver,ver}; } };
+  root.querySelector('#p-reset').onclick=reset;
+  function tick(){ const now=performance.now(); if(traffic && Math.random()<0.35) op(); inflight=inflight.filter(m=>{ if(!canReach(m.from,m.to)) return true; if(now>=m.arrive){ if(m.ver>rep[m.to].ver) rep[m.to]={val:m.val,ver:m.ver}; return false;} return true; }); draw(); }
+  function draw(){ let s=''; s+='<line x1="145" y1="75" x2="235" y2="75" stroke="#14213D" stroke-width="2"/>'; s+='<line x1="325" y1="75" x2="415" y2="75" stroke="'+(partitioned?'#B3261E':'#14213D')+'" stroke-width="2" '+(partitioned?'stroke-dasharray="6 5"':'')+'/>'; if(partitioned) s+='<text x="345" y="65" class="lbl" fill="#B3261E">✂ cut</text>';
+    names.forEach((n,i)=>{ const cls='node'+(partitioned&&i===2?' partitioned':''); s+='<rect x="'+(X[i]-45)+'" y="40" width="90" height="70" rx="6" class="'+cls+'"/><text x="'+(X[i]-38)+'" y="60" class="lbl">'+n+(i<2?' (majority)':'')+'</text><text x="'+(X[i]-38)+'" y="90" class="val">'+rep[i].val+'</text>'; });
+    root.querySelector('#p-svg').innerHTML=s; root.querySelector('#p-ok').textContent=st.ok; root.querySelector('#p-ref').textContent=st.ref; root.querySelector('#p-stale').textContent=st.stale; root.querySelector('#p-conf').textContent=st.conf; }
+  reset(); root._timer=setInterval(tick,120);
+};
+
+// 3. Replication + failover
+WIDGETS.replication = function(root){
+  root.innerHTML = labShell('Leader, two followers, one crash','Hold "Write" to stream writes. Then crash the leader.',
+   '<label>Mode <select id="r-mode"><option value="async">asynchronous</option><option value="semi">semi-synchronous (wait for 1 follower)</option></select></label>'+
+   '<label>Follower lag <input type="range" id="r-lag" min="100" max="3000" step="100" value="1500"> <span id="r-lv">1.5s</span></label>'+
+   '<button id="r-w">Write (hold)</button><button class="bad" id="r-crash">Crash leader</button><button class="secondary" id="r-reset">Reset</button>',
+   '<svg viewBox="0 0 560 200" id="r-svg"></svg><div class="stats"><div class="stat"><b id="r-ack">0</b><span>acknowledged</span></div><div class="stat"><b id="r-f1">0</b><span>on follower 1</span></div><div class="stat"><b id="r-f2">0</b><span>on follower 2</span></div><div class="stat"><b id="r-lost" style="color:var(--bad)">—</b><span>lost at failover</span></div></div>');
+  root._t0=performance.now(); const log=mkLog(root);
+  let leaderIdx, nodes, acked, pendingAcks, inflight, holding, lost, lastW;
+  function reset(){ nodes=[{name:'leader',applied:0,alive:true},{name:'follower 1',applied:0,alive:true},{name:'follower 2',applied:0,alive:true}]; leaderIdx=0; acked=0; pendingAcks=[]; inflight=[]; holding=false; lost=null; lastW=0; root.querySelector('#r-crash').disabled=false; root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  root.querySelector('#r-lag').oninput=e=>root.querySelector('#r-lv').textContent=(e.target.value/1000).toFixed(1)+'s';
+  const lag=()=>+root.querySelector('#r-lag').value;
+  const wb=root.querySelector('#r-w'); wb.onpointerdown=()=>{holding=true;}; wb.onpointerup=wb.onpointerleave=()=>{holding=false;}; wb.onclick=()=>write();
+  function write(){ if(!nodes[leaderIdx].alive) return; const L=nodes[leaderIdx]; L.applied++; const idx=L.applied; const now=performance.now();
+    nodes.forEach((n,j)=>{ if(j!==leaderIdx && n.alive) inflight.push({to:j,idx,arrive:now+lag()*(0.8+Math.random()*0.4)}); });
+    if(root.querySelector('#r-mode').value==='async'){ acked++; } else { pendingAcks.push(idx); } }
+  root.querySelector('#r-crash').onclick=e=>{ const L=nodes[leaderIdx]; L.alive=false; e.target.disabled=true; inflight=inflight.filter(m=>m.to!==leaderIdx); pendingAcks=[]; let best=-1,bi=-1; nodes.forEach((n,j)=>{ if(n.alive && n.applied>best){best=n.applied;bi=j;} }); lost=Math.max(0,acked-best); log('bad','leader crashed with '+L.applied+' entries; '+acked+' had been acknowledged'); log(lost>0?'bad':'ok','promoted '+nodes[bi].name+' (has '+best+' entries) — '+lost+' acknowledged write(s) lost'); leaderIdx=bi; nodes[bi].name+=' → new leader'; };
+  root.querySelector('#r-reset').onclick=reset;
+  function tick(){ const now=performance.now(); if(holding && now-lastW>90){ write(); lastW=now; }
+    inflight=inflight.filter(m=>{ if(now>=m.arrive){ const n=nodes[m.to]; if(n.alive && m.idx>n.applied) n.applied=m.idx; while(pendingAcks.length && nodes.some((x,j)=>j!==leaderIdx&&x.alive&&x.applied>=pendingAcks[0])){ pendingAcks.shift(); acked++; } return false; } return true; }); draw(); }
+  function draw(){ const Y=[40,100,160]; let s=''; nodes.forEach((n,i)=>{ const isL=i===leaderIdx&&n.alive; s+='<text x="10" y="'+(Y[i]+5)+'" class="lbl">'+n.name+'</text><rect x="130" y="'+(Y[i]-12)+'" width="400" height="24" rx="4" fill="#F1F3F7" stroke="#CBD3DF"/>'; const w=Math.min(400,n.applied*4); s+='<rect x="130" y="'+(Y[i]-12)+'" width="'+w+'" height="24" rx="4" fill="'+(n.alive?(isL?'#1F4FD8':'#6B7793'):'#D9D9D9')+'"/><text x="'+(135+w)+'" y="'+(Y[i]+5)+'" class="val">'+n.applied+(n.alive?'':' ✝')+'</text>'; });
+    const now=performance.now(); inflight.forEach(m=>{ const y=Y[m.to]-20; s+='<circle cx="'+(130+Math.min(400,m.idx*4))+'" cy="'+y+'" r="4" class="msg"/>'; });
+    root.querySelector('#r-svg').innerHTML=s; root.querySelector('#r-ack').textContent=acked; root.querySelector('#r-f1').textContent=nodes[1].applied; root.querySelector('#r-f2').textContent=nodes[2].applied; root.querySelector('#r-lost').textContent=lost==null?'—':lost; }
+  reset(); root._timer=setInterval(tick,60);
+};
+// 4. Quorum explorer
+WIDGETS.quorum = function(root){
+  root.innerHTML = labShell('Quorum explorer','Each round: write to W live replicas, kill/recover nodes, read from R.',
+   '<label>N <input type="range" id="q-n" min="3" max="7" value="5"> <span id="q-nv">5</span></label>'+
+   '<label>W <input type="range" id="q-w" min="1" max="7" value="3"> <span id="q-wv">3</span></label>'+
+   '<label>R <input type="range" id="q-r" min="1" max="7" value="3"> <span id="q-rv">3</span></label>'+
+   '<label>Failure rate <input type="range" id="q-f" min="0" max="50" value="15"> <span id="q-fv">15%</span></label>'+
+   '<label><input type="checkbox" id="q-hh" checked> hinted handoff</label><label><input type="checkbox" id="q-rr"> read repair</label>'+
+   '<button id="q-one">Run one round</button><button class="secondary" id="q-auto">Auto</button><button class="secondary" id="q-reset">Reset</button>',
+   '<svg viewBox="0 0 560 130" id="q-svg"></svg><div id="q-overlap" style="font-weight:600;margin:6px 0"></div><div class="stats"><div class="stat"><b id="q-wok">0</b><span>writes ok</span></div><div class="stat"><b id="q-wf" style="color:var(--ink-3)">0</b><span>writes failed</span></div><div class="stat"><b id="q-rok">0</b><span>reads fresh</span></div><div class="stat"><b id="q-rs" style="color:var(--warn)">0</b><span>reads stale</span></div><div class="stat"><b id="q-rf" style="color:var(--ink-3)">0</b><span>reads failed</span></div></div>');
+  root._t0=performance.now(); const log=mkLog(root);
+  let rep, newest, st, auto=false;
+  const g=id=>root.querySelector('#'+id); const val=id=>+g(id).value;
+  ['n','w','r','f'].forEach(k=>{ g('q-'+k).oninput=()=>{ g('q-'+k+'v').textContent=g('q-'+k).value+(k==='f'?'%':''); if(k==='n') resize(); draw(); }; });
+  function resize(){ const n=val('q-n'); g('q-w').max=n; g('q-r').max=n; if(val('q-w')>n) g('q-w').value=n; if(val('q-r')>n) g('q-r').value=n; g('q-wv').textContent=g('q-w').value; g('q-rv').textContent=g('q-r').value; while(rep.length<n) rep.push({alive:true,ver:0,hint:0}); rep.length=n; }
+  function reset(){ rep=[]; newest=0; st={wok:0,wf:0,rok:0,rs:0,rf:0}; resize(); root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  function pick(k){ const live=rep.map((r,i)=>r.alive?i:-1).filter(i=>i>=0); for(let i=live.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [live[i],live[j]]=[live[j],live[i]]; } return live.slice(0,k); }
+  function round(){ const N=val('q-n'),W=val('q-w'),R=val('q-r'),F=val('q-f')/100;
+    // write
+    const ws=pick(W); if(ws.length<W){ st.wf++; log('t','write failed: only '+ws.length+' live replicas, need W='+W); } else { newest++; ws.forEach(i=>rep[i].ver=newest); st.wok++; if(g('q-hh').checked){ rep.forEach((r,i)=>{ if(!r.alive) r.hint=newest; }); } log('info','write ver '+newest+' → replicas '+ws.map(i=>i+1).join(',')); }
+    // churn
+    rep.forEach((r,i)=>{ if(r.alive){ if(Math.random()<F){ r.alive=false; log('warn','replica '+(i+1)+' died'); } } else if(Math.random()<0.5){ r.alive=true; if(r.hint>r.ver){ r.ver=r.hint; log('ok','replica '+(i+1)+' recovered and received hinted ver '+r.hint); } else log('t','replica '+(i+1)+' recovered'); r.hint=0; } });
+    // read
+    const rs=pick(R); if(rs.length<R){ st.rf++; log('t','read failed: only '+rs.length+' live replicas, need R='+R); } else { const mx=Math.max(...rs.map(i=>rep[i].ver)); if(mx>=newest){ st.rok++; log('ok','read from '+rs.map(i=>i+1).join(',')+' → ver '+mx+' (fresh)'); } else { st.rs++; log('warn','read from '+rs.map(i=>i+1).join(',')+' → ver '+mx+' — STALE (newest '+newest+')'); } if(g('q-rr').checked) rs.forEach(i=>{ if(rep[i].ver<mx) rep[i].ver=mx; }); }
+    draw(); }
+  g('q-one').onclick=round; g('q-auto').onclick=e=>{ auto=!auto; e.target.textContent=auto?'Stop':'Auto'; }; g('q-reset').onclick=reset;
+  function draw(){ const N=rep.length; let s=''; const gap=560/(N+1); rep.forEach((r,i)=>{ const x=gap*(i+1); s+='<circle cx="'+x+'" cy="55" r="24" class="node'+(r.alive?'':' dead')+'"/><text x="'+(x-5)+'" y="50" class="lbl">'+(i+1)+'</text><text x="'+(x-10)+'" y="68" class="val">v'+r.ver+'</text>'+(r.hint>r.ver?'<text x="'+(x-18)+'" y="100" class="lbl" fill="#C77700">hint v'+r.hint+'</text>':''); });
+    g('q-svg').innerHTML=s; const W=val('q-w'),R=val('q-r'); const ok=W+R>N; g('q-overlap').innerHTML='R + W = '+(R+W)+(ok?' > ':' ≤ ')+N+' → '+(ok?'<span style="color:var(--ok)">overlap guaranteed</span>':'<span style="color:var(--warn)">no overlap guarantee</span>'); ['wok','wf','rok','rs','rf'].forEach(k=>g('q-'+k).textContent=st[k]); }
+  reset(); root._timer=setInterval(()=>{ if(auto) round(); },700);
+};
+
+// 5. CRDT playground
+WIDGETS.crdt = function(root){
+  root.innerHTML = labShell('Two replicas, two CRDTs','Edit both sides independently, then merge. Try to lose an update.',
+   '<button id="d-merge">Merge replicas</button><button class="secondary" id="d-reset">Reset</button>',
+   '<div id="d-stage" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"></div>', true);
+  let A,B;
+  function fresh(id){ return {id, P:{A:0,B:0}, N:{A:0,B:0}, set:{}, removed:{}, tagSeq:0}; }
+  function counterVal(r){ return r.P.A+r.P.B-r.N.A-r.N.B; }
+  function setVal(r){ const out={}; for(const tag in r.set){ if(!r.removed[tag]) out[r.set[tag]]=true; } return Object.keys(out).sort(); }
+  function merge(x,y){ const m=fresh(x.id); ['A','B'].forEach(k=>{ m.P[k]=Math.max(x.P[k],y.P[k]); m.N[k]=Math.max(x.N[k],y.N[k]); }); Object.assign(m.set,x.set,y.set); Object.assign(m.removed,x.removed,y.removed); m.tagSeq=Math.max(x.tagSeq,y.tagSeq); return m; }
+  function render(){ const stage=root.querySelector('#d-stage'); stage.innerHTML=''; [A,B].forEach(r=>{ const box=h('div',{style:'background:#F3F5F9;border-radius:6px;padding:12px'}); box.innerHTML='<div style="font-weight:600;margin-bottom:8px">Replica '+r.id+'</div>'+
+      '<div><b style="font-size:22px">'+counterVal(r)+'</b> <span style="color:var(--ink-3)">PN-Counter</span> <button data-r="'+r.id+'" data-a="inc" class="secondary">+1</button> <button data-r="'+r.id+'" data-a="dec" class="secondary">−1</button></div>'+
+      '<div style="font-family:var(--mono);font-size:12px;color:var(--ink-2);margin:4px 0 12px">P={A:'+r.P.A+', B:'+r.P.B+'}  N={A:'+r.N.A+', B:'+r.N.B+'}</div>'+
+      '<div><b>{ '+setVal(r).map(S).join(', ')+' }</b> <span style="color:var(--ink-3)">OR-Set</span></div>'+
+      '<div style="margin:6px 0"><input id="d-in-'+r.id+'" placeholder="element" style="width:100px;padding:5px;border:1px solid var(--line);border-radius:4px"> <button data-r="'+r.id+'" data-a="add" class="secondary">add</button> <button data-r="'+r.id+'" data-a="rem" class="secondary">remove</button></div>'+
+      '<div style="font-family:var(--mono);font-size:12px;color:var(--ink-2)">tags: '+Object.entries(r.set).map(([t,e])=>(r.removed[t]?'<s>':'')+S(e)+'#'+t+(r.removed[t]?'</s>':'')).join(' ')+'</div>';
+    stage.appendChild(box); });
+    stage.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const r=b.dataset.r==='A'?A:B; const a=b.dataset.a; if(a==='inc') r.P[r.id]++; if(a==='dec') r.N[r.id]++; if(a==='add'||a==='rem'){ const el=root.querySelector('#d-in-'+r.id).value.trim(); if(!el) return; if(a==='add'){ r.tagSeq++; r.set[r.id+r.tagSeq]=el; } else { for(const t in r.set) if(r.set[t]===el) r.removed[t]=true; } } render(); }); }
+  root.querySelector('#d-merge').onclick=()=>{ const m=merge(A,B); A=Object.assign(fresh('A'),m,{id:'A'}); B=Object.assign(fresh('B'),m,{id:'B'}); render(); };
+  root.querySelector('#d-reset').onclick=()=>{ A=fresh('A'); B=fresh('B'); render(); };
+  A=fresh('A'); B=fresh('B'); render();
+};
+
+// 6. Raft
+WIDGETS.raft = function(root){
+  root.innerHTML = labShell('Raft cluster of five','Randomized timeouts, heartbeats, a log. Pre-Vote is off on purpose.',
+   '<label>Speed <input type="range" id="f-speed" min="1" max="10" value="4"></label>'+
+   '<button id="f-write">Client write</button><button class="bad" id="f-crash">Crash leader</button><button class="secondary" id="f-revive">Revive all</button>'+
+   '<label>Node <select id="f-node"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label><button class="warn" id="f-part">Partition</button><button class="secondary" id="f-heal">Heal</button><button class="secondary" id="f-reset">Reset</button>',
+   '<svg viewBox="0 0 560 250" id="f-svg"></svg>');
+  root._t0=performance.now(); const log=mkLog(root);
+  const N=5, HB=100, ET=[300,600], NET=[40,90];
+  let nodes, msgs, now, cmdSeq;
+  function mk(i){ return {id:i,state:'follower',term:0,votedFor:null,log:[],commit:0,alive:true,part:false,timeout:0,votes:0,next:[],match:[],hb:0}; }
+  function rnd(a,b){ return a+Math.random()*(b-a); }
+  function resetTimer(n){ n.timeout=now+rnd(ET[0],ET[1]); }
+  function reset(){ now=0; cmdSeq=0; msgs=[]; nodes=[]; for(let i=0;i<N;i++){ const n=mk(i); nodes.push(n); resetTimer(n); } root.querySelector('.log').innerHTML=''; root._t0=performance.now(); draw(); }
+  function send(from,to,m){ if(!nodes[from].alive||!nodes[to].alive||nodes[from].part||nodes[to].part) return; msgs.push(Object.assign({from,to,at:now+rnd(NET[0],NET[1])},m)); }
+  const majority=Math.floor(N/2)+1;
+  function becomeFollower(n,term){ if(n.state==='leader') log('warn','node '+(n.id+1)+' steps down (saw term '+term+')'); n.state='follower'; n.term=term; n.votedFor=null; resetTimer(n); }
+  function startElection(n){ n.state='candidate'; n.term++; n.votedFor=n.id; n.votes=1; resetTimer(n); log('info','node '+(n.id+1)+' times out → candidate for term '+n.term); const li=n.log.length, lt=li?n.log[li-1].term:0; for(let j=0;j<N;j++) if(j!==n.id) send(n.id,j,{type:'RV',term:n.term,li,lt}); }
+  function becomeLeader(n){ n.state='leader'; n.next=Array(N).fill(n.log.length+1); n.match=Array(N).fill(0); n.hb=0; log('ok','node '+(n.id+1)+' elected leader for term '+n.term+' ('+n.votes+' votes)'); heartbeat(n); }
+  function heartbeat(L){ L.hb=now+HB; for(let j=0;j<N;j++){ if(j===L.id) continue; const pi=L.next[j]-1; const pt=pi>0?L.log[pi-1].term:0; const entries=L.log.slice(pi); send(L.id,j,{type:'AE',term:L.term,pi,pt,entries,lc:L.commit}); } }
+  function handle(m){ const n=nodes[m.to]; if(!n.alive) return;
+    if(m.term>n.term) becomeFollower(n,m.term);
+    if(m.type==='RV'){ const li=n.log.length, lt=li?n.log[li-1].term:0; const upToDate=m.lt>lt||(m.lt===lt&&m.li>=li); const grant=m.term===n.term&&(n.votedFor===null||n.votedFor===m.from)&&upToDate; if(grant){ n.votedFor=m.from; resetTimer(n); } send(n.id,m.from,{type:'RVR',term:n.term,grant}); }
+    else if(m.type==='RVR'){ if(n.state==='candidate'&&m.term===n.term&&m.grant){ n.votes++; if(n.votes>=majority) becomeLeader(n); } }
+    else if(m.type==='AE'){ if(m.term<n.term){ send(n.id,m.from,{type:'AER',term:n.term,ok:false,mi:0}); return; } if(n.state!=='follower') n.state='follower'; resetTimer(n); const ok=m.pi===0||(n.log.length>=m.pi&&n.log[m.pi-1].term===m.pt); if(ok){ n.log=n.log.slice(0,m.pi).concat(m.entries); if(m.lc>n.commit){ const old=n.commit; n.commit=Math.min(m.lc,n.log.length); if(n.commit>old) log('t','node '+(n.id+1)+' commit index → '+n.commit); } } send(n.id,m.from,{type:'AER',term:n.term,ok,mi:ok?m.pi+m.entries.length:0,pi:m.pi}); }
+    else if(m.type==='AER'){ if(n.state!=='leader'||m.term!==n.term) return; if(m.ok){ n.match[m.from]=Math.max(n.match[m.from],m.mi); n.next[m.from]=m.mi+1; for(let idx=n.log.length;idx>n.commit;idx--){ if(n.log[idx-1].term!==n.term) continue; const cnt=1+n.match.filter((x,j)=>j!==n.id&&x>=idx).length; if(cnt>=majority){ n.commit=idx; log('ok','leader committed entry '+idx+' ('+n.log[idx-1].cmd+') on '+cnt+' nodes'); break; } } } else { n.next[m.from]=Math.max(1,n.next[m.from]-1); } } }
+  function step(){ now+=10; msgs.sort((a,b)=>a.at-b.at); while(msgs.length&&msgs[0].at<=now){ const m=msgs.shift(); if(!nodes[m.to].part&&!nodes[m.from].part) handle(m); } nodes.forEach(n=>{ if(!n.alive) return; if(n.state==='leader'){ if(now>=n.hb) heartbeat(n); } else if(now>=n.timeout) startElection(n); }); }
+  function leader(){ return nodes.find(n=>n.alive&&n.state==='leader'&&!n.part); }
+  root.querySelector('#f-write').onclick=()=>{ const L=leader(); if(!L){ log('warn','no reachable leader; write rejected'); return; } cmdSeq++; L.log.push({term:L.term,cmd:'set x='+cmdSeq}); log('info','client → leader '+(L.id+1)+': set x='+cmdSeq+' appended at index '+L.log.length); heartbeat(L); };
+  root.querySelector('#f-crash').onclick=()=>{ const L=nodes.find(n=>n.alive&&n.state==='leader'); if(!L){ log('t','no live leader to crash'); return; } L.alive=false; log('bad','node '+(L.id+1)+' (leader, term '+L.term+') crashed'); };
+  root.querySelector('#f-revive').onclick=()=>{ nodes.forEach(n=>{ if(!n.alive){ n.alive=true; n.state='follower'; resetTimer(n); log('ok','node '+(n.id+1)+' revived as follower (term '+n.term+')'); } }); };
+  root.querySelector('#f-part').onclick=()=>{ const n=nodes[+root.querySelector('#f-node').value-1]; n.part=true; log('bad','node '+(n.id+1)+' partitioned from the cluster'); };
+  root.querySelector('#f-heal').onclick=()=>{ const n=nodes[+root.querySelector('#f-node').value-1]; if(n.part){ n.part=false; log('warn','node '+(n.id+1)+' reconnected with term '+n.term+' — watch for disruption'); } };
+  root.querySelector('#f-reset').onclick=reset;
+  function draw(){ let s=''; const cx=[80,190,300,410,520]; nodes.forEach((n,i)=>{ const cls='node '+(n.alive?(n.state==='leader'?'leader':n.state==='candidate'?'candidate':''):'dead')+(n.part?' partitioned':''); s+='<circle cx="'+cx[i]+'" cy="50" r="30" class="'+cls+'"/><text x="'+(cx[i]-6)+'" y="46" class="val">'+(i+1)+'</text><text x="'+(cx[i]-22)+'" y="64" class="lbl">t'+n.term+' '+(n.alive?n.state.slice(0,4):'dead')+'</text>';
+      // log bars
+      n.log.forEach((e,k)=>{ const x=cx[i]-45+k*9; if(k>9) return; const committed=k<n.commit; s+='<rect x="'+x+'" y="'+(95+(e.term%4)*0)+'" width="8" height="'+(committed?26:16)+'" fill="'+(committed?'#1F4FD8':'#B9C4DB')+'"><title>index '+(k+1)+' term '+e.term+' '+e.cmd+'</title></rect>'; });
+      s+='<text x="'+(cx[i]-45)+'" y="140" class="lbl">log '+n.log.length+' · commit '+n.commit+'</text>';
+      if(n.alive&&n.state!=='leader'){ const frac=Math.max(0,Math.min(1,(n.timeout-now)/ET[1])); s+='<rect x="'+(cx[i]-45)+'" y="150" width="90" height="4" fill="#E3E8EF"/><rect x="'+(cx[i]-45)+'" y="150" width="'+(90*frac)+'" height="4" fill="#C77700"/>'; } });
+    msgs.forEach(m=>{ const p=1-Math.max(0,(m.at-now))/NET[1]; const x=cx[m.from]+(cx[m.to]-cx[m.from])*p; const y=190+Math.sin(p*Math.PI)*25*(m.to>m.from?1:-1); s+='<circle cx="'+x+'" cy="'+y+'" r="4" class="msg'+(m.type==='RV'||m.type==='RVR'?' stale':'')+'"><title>'+m.type+' term '+m.term+'</title></circle>'; });
+    s+='<text x="10" y="245" class="lbl">sim time '+(now/1000).toFixed(1)+'s · blue = AppendEntries · amber = votes · bar = election timer</text>'; root.querySelector('#f-svg').innerHTML=s; }
+  reset(); root._timer=setInterval(()=>{ const sp=+root.querySelector('#f-speed').value; for(let k=0;k<sp;k++) step(); draw(); },50);
+};
+// ---------- App ----------
+const ORDER = Object.keys(CH).sort((a,b)=>CH[a].n-CH[b].n);
+const done = new Set(); // in-memory only; resets on reload
+let currentTimer=null;
+
+function partTitle(p){ return (PARTS.find(x=>x[0]===p)||[p,'Part '+p])[1]; }
+function renderTOC(){ const toc=document.getElementById('toc'); toc.innerHTML=''; PARTS.forEach(([p,title])=>{ const ids=ORDER.filter(id=>CH[id].part===p); const d=h('details',{open: p===3?'':null}); if(p!==3) d.removeAttribute('open'); d.innerHTML='<summary><span>Part '+(p-2)+' · '+title+'</span><span class="count">'+ids.length+'</span></summary><ol>'+ids.map(id=>'<li><a href="#'+id+'" data-id="'+id+'" class="'+(CH[id].stub?'stub':'')+'"><span class="n">'+CH[id].n+'</span><span>'+CH[id].title+'</span></a></li>').join('')+'</ol>'; toc.appendChild(d); }); }
+function chipList(ids){ return ids.length? ids.map(id=>'<a href="#'+id+'">'+CH[id].n+' · '+CH[id].title+'</a>').join(''):'<span style="color:var(--ink-3)">none — this is a starting point</span>'; }
+function render(id){ const c=CH[id]; if(!c) return render(ORDER[0]); if(currentTimer){ clearInterval(currentTimer); currentTimer=null; }
+  const main=document.getElementById('main'); const idx=ORDER.indexOf(id); const prev=ORDER[idx-1], next=ORDER[idx+1];
+  const usedBy=ORDER.filter(x=>CH[x].on.includes(id));
+  let body='';
+  if(c.stub){ body='<div class="stub-note">This chapter is scaffolded: objectives and outline are final, the first-principles text and simulator are the next release. It builds directly on the chapters listed above; read those first.</div><div class="prose"><h3>Session outline (2 hours)</h3><ol>'+c.outline.map(o=>'<li>'+o+'</li>').join('')+'</ol></div>'; }
+  else { body='<div class="prose">'+c.html+'</div><div id="widget"></div>'+(c.hw?'<div class="homework"><h4>Homework</h4><ol style="margin:0;padding-left:20px">'+c.hw.map(x=>'<li>'+x+'</li>').join('')+'</ol></div>':''); }
+  main.innerHTML='<div class="crumb">Part '+(c.part-2)+' · '+partTitle(c.part)+'</div><h2 class="title">'+c.n+'. '+c.title+'</h2>'+
+    '<div class="meta"><div><b>Builds on</b><div class="chips">'+chipList(c.on)+'</div></div>'+(usedBy.length?'<div><b>Used by</b><div class="chips">'+chipList(usedBy)+'</div></div>':'')+'</div>'+
+    '<div class="objectives"><h4>By the end of this chapter you can</h4><ul>'+c.obj.map(o=>'<li>'+o+'</li>').join('')+'</ul></div>'+body+
+    '<div class="pager">'+(prev?'<a href="#'+prev+'"><small>Previous</small>'+CH[prev].n+'. '+CH[prev].title+'</a>':'<span></span>')+(next?'<a href="#'+next+'" style="text-align:right"><small>Next</small>'+CH[next].n+'. '+CH[next].title+'</a>':'')+'</div>';
+  if(!c.stub && c.widget && WIDGETS[c.widget]){ const w=document.getElementById('widget'); WIDGETS[c.widget](w); currentTimer=w._timer||null; }
+  done.add(id); document.querySelectorAll('.rail a[data-id]').forEach(a=>{ a.classList.toggle('active',a.dataset.id===id); a.classList.toggle('done',done.has(a.dataset.id)); if(a.dataset.id===id){ const d=a.closest('details'); if(d) d.open=true; } });
+  document.getElementById('progressBar').style.width=(100*done.size/ORDER.length).toFixed(1)+'%';
+  window.scrollTo(0,0); document.getElementById('rail').classList.remove('open'); }
+window.addEventListener('hashchange',()=>render(location.hash.slice(1)));
+document.getElementById('menuBtn').onclick=()=>document.getElementById('rail').classList.toggle('open');
+renderTOC(); render(location.hash.slice(1)||ORDER[0]);
+</script>
+</body>
+</html>
